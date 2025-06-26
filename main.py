@@ -1,7 +1,7 @@
 import time
 import arcade
 
-TILE_SCALING = 0.5
+TILE_SCALING = 3
 PLAYER_SCALING = 1
 
 WINDOW_WIDTH = 1280
