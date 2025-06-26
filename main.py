@@ -93,7 +93,7 @@ class GameView(arcade.View):
         self.player_sprite.center_y = 270
         self.player_list.append(self.player_sprite)
 
-        map_name = ":resources:/tiled_maps/map.json"
+        map_name = arcade.tilemap.read_tmx("testmap.tmx")
 
         layer_options = {
             "Platforms": {"use_spatial_hash": True},
