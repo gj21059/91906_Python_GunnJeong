@@ -1,5 +1,6 @@
 import time
 import arcade
+import os
 
 TILE_SCALING = 3
 PLAYER_SCALING = 1
@@ -51,22 +52,27 @@ class GameView(arcade.View):
         self.player_list = arcade.SpriteList()
 
         self.player_sprite = arcade.Sprite(
-            ":resources:images/animated_characters/female_person/femalePerson_idle.png",
+            "resources/sprites/player",
             scale=PLAYER_SCALING,
         )
         self.player_sprite.center_x = 196
         self.player_sprite.center_y = 270
         self.player_list.append(self.player_sprite)
 
-        map_name = "resources/maps/testmap.tmx"
+        
+        file_path = os.path.dirname(os.path.abspath(__file__))
+        map_path = os.path.join(file_path, "resources/maps/testmap.tmx")   
 
         layer_options = {
             "floor": {"use_spatial_hash": True},
         }
 
         self.tile_map = arcade.load_tilemap(
-            map_name, layer_options=layer_options, scaling=TILE_SCALING
+        map_path,
+        scaling=TILE_SCALING,
+        layer_options=layer_options,
         )
+        
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
 
         self.wall_list = self.tile_map.sprite_lists["floor"]
