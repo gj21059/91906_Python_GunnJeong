@@ -2,20 +2,78 @@ import time
 import arcade
 import os
 
-TILE_SCALING = 3
-PLAYER_SCALING = 1
+TILE_SCALING = 2.5
+PLAYER_SCALING = 2
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
-WINDOW_TITLE = "Sprite Tiled Map Example"
+WINDOW_TITLE = "Game"
 SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
 CAMERA_PAN_SPEED = 0.30
 
+RIGHT_FACING = 0
+LEFT_FACING = 1
+
+
 # Physics
 MOVEMENT_SPEED = 5
+UPDATES_PER_FRAME = 5
 JUMP_SPEED = 23
 GRAVITY = 1.1
+
+class PlayerCharacter(arcade.Sprite):
+    def __init__(self, idle_texture_pair, run_texture_pairs, jump_textures, fall_texture_pair):
+        self.character_face_direction = RIGHT_FACING
+        self.cur_texture = 0
+        self.jump_frame_count = 0
+        self.jump_frame = 0 
+
+        self.idle_texture_pair = idle_texture_pair
+        self.run_textures = run_texture_pairs
+        self.jump_textures = jump_textures
+        self.fall_texture_pair = fall_texture_pair
+
+        super().__init__(self.idle_texture_pair[0], scale=PLAYER_SCALING)
+
+        self.jump_frame = 0  # initialize jump_frame here
+
+
+    def update_animation(self, delta_time: float = 1 / 60):
+        if self.change_x < 0:
+            self.character_face_direction = LEFT_FACING
+        elif self.change_x > 0:
+            self.character_face_direction = RIGHT_FACING
+
+        if self.change_y > 0:
+            self.jump_frame += 1
+            if self.jump_frame_count >= 2100:
+                self.jump_frame += 1
+                self.jump_frame_count = 0
+            if self.jump_frame >= len(self.jump_textures):
+                self.jump_frame = len(self.jump_textures) - 1  
+            self.texture = self.jump_textures[self.jump_frame][self.character_face_direction]
+            return
+        elif self.change_y < 0:
+            self.texture = self.fall_texture_pair[self.character_face_direction]
+            self.jump_frame = 0
+            return
+        else:
+            self.jump_frame = 0
+
+        if self.change_x == 0:
+            self.texture = self.idle_texture_pair[self.character_face_direction]
+            return
+
+        self.cur_texture += 1
+        if self.cur_texture >= len(self.run_textures) * UPDATES_PER_FRAME:
+            self.cur_texture = 0
+        frame = self.cur_texture // UPDATES_PER_FRAME
+        direction = self.character_face_direction
+        self.texture = self.run_textures[frame][direction]
+
+
+
 
 
 class GameView(arcade.View):
@@ -23,38 +81,56 @@ class GameView(arcade.View):
         super().__init__()
 
         self.tile_map = None
-
         self.player_list = None
+        self.player = None
         self.wall_list = None
-        self.coin_list = None  # Will be an empty SpriteList since no coins
-
         self.score = 0
         self.player_sprite = None
-
         self.physics_engine = None
         self.end_of_map = 0
         self.game_over = False
         self.last_time = None
         self.frame_count = 0
-
         self.camera = None
         self.camera_bounds = None
         self.gui_camera = None
 
-        self.fps_text = arcade.Text(
-            "", x=10, y=40, color=arcade.color.BLACK, font_size=14
-        )
-        self.distance_text = arcade.Text(
-            "0.0", x=10, y=20, color=arcade.color.BLACK, font_size=14
-        )
+        self.fps_text = arcade.Text("", x=10, y=40, color=arcade.color.BLACK, font_size=14)
+        self.distance_text = arcade.Text("0.0", x=10, y=20, color=arcade.color.BLACK, font_size=14)
+
+      
+        character_path = "resources/sprites"
+
+        idle = arcade.load_texture(f"{character_path}/player_idle/player_idle0.png")
+        self.idle_texture_pair = idle, idle.flip_left_right()
+
+        self.run_texture_pairs = []
+        for i in range(8):  # Adjust range based on your walk sprites
+            run_texture = arcade.load_texture(f"{character_path}/player_run/player_run{i}.png")
+            self.run_texture_pairs.append((run_texture, run_texture.flip_left_right()))
+
+        self.jump_textures = []
+        for i in range(16):
+            jump_textures = arcade.load_texture(f"{character_path}/player_jump/player_jump{i}.png")
+            self.jump_textures.append((jump_textures, jump_textures.flip_left_right()))
+
+        
+        fall = arcade.load_texture(f"{character_path}/player_idle/player_idle1.png")
+
+        self.fall_texture_pair = fall, fall.flip_left_right()
+
+
+
 
     def setup(self):
         self.player_list = arcade.SpriteList()
 
-        self.player_sprite = arcade.Sprite(
-            "resources/sprites/player",
-            scale=PLAYER_SCALING,
-        )
+        self.player_sprite = PlayerCharacter(
+            self.idle_texture_pair,
+            self.run_texture_pairs,
+            self.jump_textures,
+            self.fall_texture_pair,
+            )
         self.player_sprite.center_x = 196
         self.player_sprite.center_y = 270
         self.player_list.append(self.player_sprite)
@@ -157,9 +233,8 @@ class GameView(arcade.View):
 
         if not self.game_over:
             self.physics_engine.update()
+            self.player_sprite.update_animation(delta_time)
 
-        # No coins to collect, so skip collision check with coin_list
-        # But if you want to keep it safe:
         coins_hit = arcade.check_for_collision_with_list(
             self.player_sprite, self.coin_list
         )
