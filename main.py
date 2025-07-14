@@ -2,7 +2,7 @@ import time
 import arcade
 import os
 
-TILE_SCALING = 2.5
+TILE_SCALING = 3
 PLAYER_SCALING = 2
 
 WINDOW_WIDTH = 1280
@@ -160,10 +160,13 @@ class GameView(arcade.View):
         scaling=TILE_SCALING,
         layer_options=layer_options,
         )
-        
+        self.scene = arcade.Scene.from_tilemap(self.tile_map)
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
 
         self.wall_list = self.tile_map.sprite_lists["floor"]
+        self.background = self.scene["Background"]
+        self.midground = self.scene["Midground"]
+        self.foreground = self.scene["Foreground"]
 
         # No coins layer, so create empty coin_list
         self.coin_list = arcade.SpriteList()
@@ -195,11 +198,10 @@ class GameView(arcade.View):
         self.camera.use()
         self.clear()
 
-        arcade.start_render()
 
-        self.scene.draw(filter=("Background",))  # Farthest back
-        self.scene.draw(filter=("Midground",))   # Middle layer
-        self.scene.draw(filter=("Foreground",))  # Closest background
+        self.scene["Background"].draw()
+        self.scene["Midground"].draw()
+        self.scene["Foreground"].draw()
 
         self.frame_count += 1
 
