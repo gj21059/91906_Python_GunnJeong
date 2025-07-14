@@ -23,18 +23,18 @@ JUMP_SPEED = 23
 GRAVITY = 1.1
 
 class PlayerCharacter(arcade.Sprite):
-    def __init__(self, idle_texture_pair, run_texture_pairs, jump_textures, fall_texture_pair):
+    def __init__(self, idle_textures, run_textures, jump_textures, fall_texture_pair):
         self.character_face_direction = RIGHT_FACING
         self.cur_texture = 0
         self.jump_frame_count = 0
         self.jump_frame = 0 
 
-        self.idle_texture_pair = idle_texture_pair
-        self.run_textures = run_texture_pairs
+        self.idle_textures = idle_textures
+        self.run_textures = run_textures
         self.jump_textures = jump_textures
         self.fall_texture_pair = fall_texture_pair
 
-        super().__init__(self.idle_texture_pair[0], scale=PLAYER_SCALING)
+        super().__init__(self.idle_textures[0], scale=PLAYER_SCALING)
 
         self.jump_frame = 0  # initialize jump_frame here
 
@@ -61,9 +61,7 @@ class PlayerCharacter(arcade.Sprite):
         else:
             self.jump_frame = 0
 
-        if self.change_x == 0:
-            self.texture = self.idle_texture_pair[self.character_face_direction]
-            return
+
 
         self.cur_texture += 1
         if self.cur_texture >= len(self.run_textures) * UPDATES_PER_FRAME:
@@ -72,6 +70,14 @@ class PlayerCharacter(arcade.Sprite):
         direction = self.character_face_direction
         self.texture = self.run_textures[frame][direction]
 
+        if self.change_x == 0 and self.change_y == 0:
+            self.cur_texture += 1
+            if self.cur_texture >= len(self.idle_textures) * UPDATES_PER_FRAME:
+                self.cur_texture = 0
+            frame = self.cur_texture // UPDATES_PER_FRAME
+            direction = self.character_face_direction
+            self.texture = self.idle_textures[frame][direction]
+            return
 
 
 
@@ -95,24 +101,27 @@ class GameView(arcade.View):
         self.camera_bounds = None
         self.gui_camera = None
 
-        self.fps_text = arcade.Text("", x=10, y=40, color=arcade.color.BLACK, font_size=14)
-        self.distance_text = arcade.Text("0.0", x=10, y=20, color=arcade.color.BLACK, font_size=14)
+        self.fps_text = arcade.Text("", x=10, y=40, color=arcade.color.WHITE, font_size=14)
+        self.distance_text = arcade.Text("0.0", x=10, y=20, color=arcade.color.WHITE, font_size=14)
 
       
         character_path = "resources/sprites"
 
-        idle = arcade.load_texture(f"{character_path}/player_idle/player_idle0.png")
-        self.idle_texture_pair = idle, idle.flip_left_right()
-
-        self.run_texture_pairs = []
+        
+        self.run_textures = []
         for i in range(8):  # Adjust range based on your walk sprites
             run_texture = arcade.load_texture(f"{character_path}/player_run/player_run{i}.png")
-            self.run_texture_pairs.append((run_texture, run_texture.flip_left_right()))
+            self.run_textures.append((run_texture, run_texture.flip_left_right()))
 
         self.jump_textures = []
         for i in range(16):
             jump_textures = arcade.load_texture(f"{character_path}/player_jump/player_jump{i}.png")
             self.jump_textures.append((jump_textures, jump_textures.flip_left_right()))
+
+        self.idle_textures = []
+        for i in range(6):
+            idle_textures = arcade.load_texture(f"{character_path}/player_idle/player_idle{i}.png")
+            self.idle_textures.append((idle_textures, idle_textures.flip_left_right()))
 
         
         fall = arcade.load_texture(f"{character_path}/player_idle/player_idle1.png")
@@ -126,8 +135,8 @@ class GameView(arcade.View):
         self.player_list = arcade.SpriteList()
 
         self.player_sprite = PlayerCharacter(
-            self.idle_texture_pair,
-            self.run_texture_pairs,
+            self.idle_textures,
+            self.run_textures,
             self.jump_textures,
             self.fall_texture_pair,
             )
@@ -218,13 +227,13 @@ class GameView(arcade.View):
         if key == arcade.key.UP or key == arcade.key.W:
             if self.physics_engine.can_jump():
                 self.player_sprite.change_y = JUMP_SPEED
-        elif key == arcade.key.LEFT or arcade.key.A:
+        elif key == arcade.key.LEFT or key == arcade.key.A:
             self.player_sprite.change_x = -MOVEMENT_SPEED
-        elif key == arcade.key.RIGHT or arcade.key.D:
+        elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_sprite.change_x = MOVEMENT_SPEED
 
     def on_key_release(self, key, modifiers):
-        if key == arcade.key.LEFT or key == arcade.key.RIGHT:
+        if key == arcade.key.LEFT or key == arcade.key.RIGHT or key == arcade.key.A or key == arcade.key.D:
             self.player_sprite.change_x = 0
 
     def on_update(self, delta_time):
