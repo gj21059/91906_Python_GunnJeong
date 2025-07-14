@@ -147,6 +147,12 @@ class GameView(arcade.View):
 
         layer_options = {
             "floor": {"use_spatial_hash": True},
+
+            "Background": {"use_spatial_hash": False},
+
+            "Midground": {"use_spatial_hash": False},
+
+            "Foreground": {"use_spatial_hash": False},
         }
 
         self.tile_map = arcade.load_tilemap(
@@ -188,6 +194,12 @@ class GameView(arcade.View):
     def on_draw(self):
         self.camera.use()
         self.clear()
+
+        arcade.start_render()
+
+        self.scene.draw(filter=("Background",))  # Farthest back
+        self.scene.draw(filter=("Midground",))   # Middle layer
+        self.scene.draw(filter=("Foreground",))  # Closest background
 
         self.frame_count += 1
 

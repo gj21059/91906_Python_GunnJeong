@@ -13,7 +13,7 @@
    <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/background/background_layer_3.png" width="320" height="180"/>
   </tile>
  </tileset>
- <objectgroup id="3" name="background">
+ <objectgroup id="3" name="Background">
   <object id="2" gid="316" x="0" y="480" width="528" height="312"/>
   <object id="3" gid="316" x="528" y="480" width="528" height="312"/>
   <object id="4" gid="316" x="912" y="480" width="528" height="312"/>
