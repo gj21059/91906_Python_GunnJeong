@@ -20,7 +20,7 @@ LEFT_FACING = 1
 MOVEMENT_SPEED = 5
 UPDATES_PER_FRAME = 5
 IDLE_UPDATES_PER_FRAME = 20
-JUMP_UPDATES_PER_FRAME = 20
+JUMP_UPDATES_PER_FRAME = 50
 JUMP_SPEED = 20
 GRAVITY = 1.1
 
@@ -47,21 +47,18 @@ class PlayerCharacter(arcade.Sprite):
         elif self.change_x > 0:
             self.character_face_direction = RIGHT_FACING
 
-        if self.change_y > 0:
+        if self.change_y > 0:  # Moving upward (jumping)
             self.jump_frame += 1
-            if self.jump_frame_count >= 2100:
-                self.jump_frame += 1
-                self.jump_frame_count = 0
             if self.jump_frame >= len(self.jump_textures):
-                self.jump_frame = len(self.jump_textures) - 1  
+                self.jump_frame = len(self.jump_textures) - 1  # Keep on last frame
             self.texture = self.jump_textures[self.jump_frame][self.character_face_direction]
             return
-        elif self.change_y < 0:
+        elif self.change_y < 0:  # Moving downward (falling)
             self.texture = self.fall_texture_pair[self.character_face_direction]
-            self.jump_frame = 0
+            self.jump_frame = 0  # Reset jump animation
             return
-        else:
-            self.jump_frame = 0
+        else:  # Not moving vertically
+            self.jump_frame = 0  # Reset jump animation
 
         self.cur_texture += 1
         if self.cur_texture >= len(self.run_textures) * UPDATES_PER_FRAME:
