@@ -19,27 +19,35 @@ LEFT_FACING = 1
 # Physics
 MOVEMENT_SPEED = 5
 UPDATES_PER_FRAME = 5
-IDLE_UPDATES_PER_FRAME = 20
+IDLE_UPDATES_PER_FRAME = 25
 JUMP_UPDATES_PER_FRAME = 50
 JUMP_SPEED = 20
 GRAVITY = 1.1
 
 class PlayerCharacter(arcade.Sprite):
-    def __init__(self, idle_textures, run_textures, jump_textures, fall_texture_pair):
+    def __init__(self, idle_textures, run_textures, jump_textures, fall_texture_pair, attack_textures):
         self.character_face_direction = RIGHT_FACING
         self.cur_texture = 0
         self.jump_frame_count = 0
         self.jump_frame = 0 
+        self.is_attacking = False
+        self.attack_frame = 0
 
         self.idle_textures = idle_textures
         self.run_textures = run_textures
         self.jump_textures = jump_textures
         self.fall_texture_pair = fall_texture_pair
+        self.attack_textures = attack_textures
 
         super().__init__(self.idle_textures[0], scale=PLAYER_SCALING)
 
         self.jump_frame = 0  # initialize jump_frame here
 
+    def start_attack(self):
+        if not self.is_attacking:
+            self.is_attacking = True
+            self.cur_texture = 0
+            
 
     def update_animation(self, delta_time: float = 1 / 60):
         if self.change_x < 0:
@@ -74,7 +82,16 @@ class PlayerCharacter(arcade.Sprite):
             frame = self.cur_texture // IDLE_UPDATES_PER_FRAME
             direction = self.character_face_direction
             self.texture = self.idle_textures[frame][direction]
-            return
+
+        if self.is_attacking:
+            self.cur_texture += 1
+            if self.cur_texture >= len(self.attack_textures) * UPDATES_PER_FRAME:
+                self.cur_texture = 0
+            frame = self.cur_texture // UPDATES_PER_FRAME
+            direction = self.character_face_direction
+            self.texture = self.idle_textures[frame][direction]
+        
+            
 
 
 
@@ -120,6 +137,10 @@ class GameView(arcade.View):
             idle_textures = arcade.load_texture(f"{character_path}/player_idle/player_idle{i}.png")
             self.idle_textures.append((idle_textures, idle_textures.flip_left_right()))
 
+        self.attack_textures = []
+        for i in range(8):
+            attack_textures = arcade.load_texture(f"{character_path}/player_attack/player_attack{i}.png")
+            self.attack_textures.append((attack_textures, attack_textures.flip_left_right()))
         
         fall = arcade.load_texture(f"{character_path}/player_idle/player_idle1.png")
 
@@ -136,6 +157,7 @@ class GameView(arcade.View):
             self.run_textures,
             self.jump_textures,
             self.fall_texture_pair,
+            self.attack_textures,
             )
         self.player_sprite.center_x = 196
         self.player_sprite.center_y = 270
@@ -242,6 +264,9 @@ class GameView(arcade.View):
             self.player_sprite.change_x = -MOVEMENT_SPEED
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_sprite.change_x = MOVEMENT_SPEED
+
+        elif key == arcade.key.SPACE:
+            self.player_sprite.start_attack()
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.LEFT or key == arcade.key.RIGHT or key == arcade.key.A or key == arcade.key.D:
