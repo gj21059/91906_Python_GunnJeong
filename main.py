@@ -19,7 +19,9 @@ LEFT_FACING = 1
 # Physics
 MOVEMENT_SPEED = 5
 UPDATES_PER_FRAME = 5
-JUMP_SPEED = 23
+IDLE_UPDATES_PER_FRAME = 20
+JUMP_UPDATES_PER_FRAME = 20
+JUMP_SPEED = 20
 GRAVITY = 1.1
 
 class PlayerCharacter(arcade.Sprite):
@@ -61,8 +63,6 @@ class PlayerCharacter(arcade.Sprite):
         else:
             self.jump_frame = 0
 
-
-
         self.cur_texture += 1
         if self.cur_texture >= len(self.run_textures) * UPDATES_PER_FRAME:
             self.cur_texture = 0
@@ -72,9 +72,9 @@ class PlayerCharacter(arcade.Sprite):
 
         if self.change_x == 0 and self.change_y == 0:
             self.cur_texture += 1
-            if self.cur_texture >= len(self.idle_textures) * UPDATES_PER_FRAME:
+            if self.cur_texture >= len(self.idle_textures) * IDLE_UPDATES_PER_FRAME:
                 self.cur_texture = 0
-            frame = self.cur_texture // UPDATES_PER_FRAME
+            frame = self.cur_texture // IDLE_UPDATES_PER_FRAME
             direction = self.character_face_direction
             self.texture = self.idle_textures[frame][direction]
             return
