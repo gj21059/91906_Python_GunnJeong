@@ -12,6 +12,7 @@ SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
 CAMERA_PAN_SPEED = 0.30
 
+PLAYER_HEALTH = 5
 RIGHT_FACING = 0
 LEFT_FACING = 1
 
@@ -25,21 +26,71 @@ JUMP_SPEED = 20
 GRAVITY = 1.1
 
 class PlayerCharacter(arcade.Sprite):
-    def __init__(self, idle_textures, run_textures, jump_textures, fall_textures, attack_textures):
+    def __init__(self, max_health, idle_textures, run_textures, jump_textures, fall_textures, attack_textures, shield_textures):
         self.character_face_direction = RIGHT_FACING
         self.cur_texture = 0
         self.jump_frame_count = 0
         self.jump_frame = 0 
         self.is_attacking = False
+        self.is_shielding = False
         self.attack_frame = 0
+        self.shield_frame = 0
+
 
         self.idle_textures = idle_textures
         self.run_textures = run_textures
         self.jump_textures = jump_textures
         self.fall_textures = fall_textures
         self.attack_textures = attack_textures
+        self.shield_textures = shield_textures
 
         super().__init__(self.idle_textures[0], scale=PLAYER_SCALING)
+        self.max_health = max_health
+        self.current_health = max_health  
+    
+    def take_damage(self, damage):
+        self.current_health -= damage
+        if self.current_health <= 0:    
+            self.current_health = 0
+            self.kill()
+
+    def heal(self, amount):
+        self.current_health += amount
+        if self.current_health > self.max_health:
+            self.current_health = self.max_health
+
+
+
+    def draw_health_bar(self):
+        # Draw the background (unhealthy) bar
+        if self.current_health < self.max_health:
+            arcade.draw_rectangle_filled(
+                center_x=self.center_x,
+                center_y=self.center_y - 20, # Adjust position
+                width=50, # Adjust width
+                height=5, # Adjust height
+                color=arcade.color.RED
+            )
+
+        # Draw the current health bar
+        current_health_width = (self.current_health / self.max_health) * 50 # Match background width
+        arcade.draw_rectangle_filled(
+            center_x=self.center_x - (50 - current_health_width) / 2, # Adjust for left alignment
+            center_y=self.center_y - 20,
+            width=current_health_width,
+            height=5,
+            color=arcade.color.GREEN
+        )
+
+    def draw_health_number(self):
+        health_string = f"{self.current_health}/{self.max_health}"
+        arcade.draw_text(
+            health_string,
+            start_x=self.center_x - 20, # Adjust position
+            start_y=self.center_y - 35, # Adjust position
+            font_size=10,
+            color=arcade.color.WHITE
+        )
 
         self.jump_frame = 0  # initialize jump_frame here
 
@@ -48,6 +99,10 @@ class PlayerCharacter(arcade.Sprite):
             self.is_attacking = True
             self.cur_texture = 0
             
+    def start_shield(self):
+        if not self.is_shielding:
+            self.is_shielding = True
+            self.cur_texture = 0       
 
     def update_animation(self, delta_time: float = 1 / 60):
         if self.change_x < 0:
@@ -98,6 +153,16 @@ class PlayerCharacter(arcade.Sprite):
                 self.texture = self.attack_textures[frame][direction]
             return  # Make sure to return so other animations don't override it
         
+        if self.is_shielding:
+            self.shield_frame += 1
+            if self.shield_frame >= len(self.shield_textures) * UPDATES_PER_FRAME:
+                self.shield_frame = 0
+                self.is_shielding = False
+            else:
+                frame = self.shield_frame // UPDATES_PER_FRAME
+                direction = self.character_face_direction
+                self.texture = self.shield_textures[frame][direction]
+            return
             
 
 
@@ -153,6 +218,11 @@ class GameView(arcade.View):
         for i in range(6):
             attack_textures = arcade.load_texture(f"{character_path}/player_attack/player_attack{i}.png")
             self.attack_textures.append((attack_textures, attack_textures.flip_left_right()))
+
+        self.shield_textures = []
+        for i in range(3):
+            shield_textures = arcade.load_texture(f"{character_path}/player_shield/player_shield{i}.png")
+            self.shield_textures.append((shield_textures, shield_textures.flip_left_right()))
         
         fall = arcade.load_texture(f"{character_path}/player_idle/player_idle1.png")
 
@@ -170,6 +240,7 @@ class GameView(arcade.View):
             self.jump_textures,
             self.fall_textures,
             self.attack_textures,
+            self.shield_textures,
             )
         self.player_sprite.center_x = 196
         self.player_sprite.center_y = 270
@@ -279,6 +350,9 @@ class GameView(arcade.View):
 
         elif key == arcade.key.SPACE:
             self.player_sprite.start_attack()
+        
+        elif key == arcade.key.E:
+            self.player_sprite.start_shield()
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.LEFT or key == arcade.key.RIGHT or key == arcade.key.A or key == arcade.key.D:
