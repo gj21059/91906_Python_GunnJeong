@@ -52,6 +52,8 @@ class EnemyCharacter(arcade.Sprite):
         self.health = 3
         self.attack_cooldown = 0
         self.takedamage_frame = 0
+        self.attack_cooldown = 0
+        self.attack_cooldown_max = 60
 
         self.change_x = 1  # Start moving right
 
@@ -84,6 +86,7 @@ class EnemyCharacter(arcade.Sprite):
             if frame >= len(self.attack_textures):
                 self.cur_texture = 0
                 self.is_attacking = False
+                self.attack_cooldown = self.attack_cooldown_max
             else:
                 self.texture = self.attack_textures[frame][self.direction]
                 self.cur_texture += 1
@@ -107,16 +110,21 @@ class EnemyCharacter(arcade.Sprite):
         self.texture = self.walk_textures[frame][self.direction]
 
     def detect_player(self, player_sprite):
-        # Simple detection logic
         distance_x = abs(player_sprite.center_x - self.center_x)
         distance_y = abs(player_sprite.center_y - self.center_y)
+        
         if distance_x < 80 and distance_y < 40:
-            self.is_attacking = True
-            self.cur_texture = 0
-            self.change_x = 0  # Stop moving
-        elif not self.is_attacking:
-            # Resume patrol
-            self.change_x = 1 if self.direction == RIGHT_FACING else -1
+            # Only start attack if not already attacking
+            if not self.is_attacking and self.attack_cooldown <= 0:
+                self.is_attacking = True
+                self.cur_texture = 0  # Reset animation only when starting attack
+                self.change_x = 0     # Stop moving
+                
+        elif not self.is_attacking:  # Only resume patrol if not attacking
+            if self.direction == RIGHT_FACING:
+                self.change_x = 1
+            else:
+                self.change_x = -1
 
     def take_damage(self, amount):
         self.health -= amount
