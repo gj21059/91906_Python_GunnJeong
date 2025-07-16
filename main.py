@@ -3,7 +3,8 @@ import arcade
 import os
 
 TILE_SCALING = 3
-PLAYER_SCALING = 2
+PLAYER_SCALING = 2.5
+ENEMY_SCALING = 2
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -20,102 +21,224 @@ LEFT_FACING = 1
 # Physics
 MOVEMENT_SPEED = 5
 UPDATES_PER_FRAME = 5
-IDLE_UPDATES_PER_FRAME = 25
+IDLE_UPDATES_PER_FRAME = 5
 JUMP_UPDATES_PER_FRAME = 50
 JUMP_SPEED = 20
 GRAVITY = 1.1
 
+
+
+
+class EnemyCharacter(arcade.Sprite):
+    def __init__(self, x, y, left_boundary, right_boundary, walk_textures, attack_textures, takedamage_textures, death_textures):
+        super().__init__(walk_textures[0][0], scale=ENEMY_SCALING)
+        self.center_x = x
+        self.center_y = y
+
+        self.left_boundary = left_boundary
+        self.right_boundary = right_boundary
+        self.walk_textures = walk_textures
+        self.attack_textures = attack_textures
+        self.death_textures = death_textures
+        self.takedamage_textures = takedamage_textures
+        self.death_textures = death_textures
+
+        self.is_attacking = False
+        self.is_dead = False
+
+        self.cur_texture = 0
+        self.direction = RIGHT_FACING
+        self.health = 3
+        self.attack_cooldown = 0
+
+        self.change_x = 1  # Start moving right
+
+    def update(self):
+        if self.is_dead:
+            return
+
+        # Patrol
+        self.center_x += self.change_x
+        if self.center_x < self.left_boundary:
+            self.change_x = 1
+            self.direction = RIGHT_FACING
+        elif self.center_x > self.right_boundary:
+            self.change_x = -1
+            self.direction = LEFT_FACING
+
+        # Cooldown handling (optional)
+        if self.attack_cooldown > 0:
+            self.attack_cooldown -= 1
+
+    def update_animation(self, delta_time: float = 1/60):
+        if self.is_dead:
+            frame = min(self.cur_texture // UPDATES_PER_FRAME, len(self.death_textures) - 1)
+            self.texture = self.death_textures[frame][self.direction]
+            self.cur_texture += 1
+            return
+
+        if self.is_attacking:
+            frame = self.cur_texture // UPDATES_PER_FRAME
+            if frame >= len(self.attack_textures):
+                self.cur_texture = 0
+                self.is_attacking = False
+            else:
+                self.texture = self.attack_textures[frame][self.direction]
+                self.cur_texture += 1
+            return
+        
+
+        if self.is_taking_damage:
+            if self.takedamage_frame < len(self.takedamage_textures) * UPDATES_PER_FRAME:
+                frame = self.takedamage_frame // UPDATES_PER_FRAME
+                self.texture = self.takedamage_textures[frame][self.character_face_direction]
+                self.takedamage_frame += 1
+            else:
+                self.is_taking_damage = False
+            return
+
+        # Walking
+        self.cur_texture += 1
+        if self.cur_texture >= len(self.walk_textures) * UPDATES_PER_FRAME:
+            self.cur_texture = 0
+        frame = self.cur_texture // UPDATES_PER_FRAME
+        self.texture = self.walk_textures[frame][self.direction]
+
+    def detect_player(self, player_sprite):
+        # Simple detection logic
+        distance_x = abs(player_sprite.center_x - self.center_x)
+        distance_y = abs(player_sprite.center_y - self.center_y)
+        if distance_x < 80 and distance_y < 40:
+            self.is_attacking = True
+            self.cur_texture = 0
+            self.change_x = 0  # Stop moving
+        elif not self.is_attacking:
+            # Resume patrol
+            self.change_x = 1 if self.direction == RIGHT_FACING else -1
+
+    def take_damage(self, amount):
+        self.health -= amount
+        if self.health <= 0:
+            self.is_dead = True
+            self.cur_texture = 0
+
+
+    
+
 class PlayerCharacter(arcade.Sprite):
-    def __init__(self, max_health, idle_textures, run_textures, jump_textures, fall_textures, attack_textures, shield_textures):
+    def __init__(self, max_health, idle_textures, run_textures, jump_textures, fall_textures,
+                 attack_textures, shield_textures, takedamage_textures, death_textures):
+        super().__init__(idle_textures[0][0], scale=PLAYER_SCALING)
+
         self.character_face_direction = RIGHT_FACING
         self.cur_texture = 0
         self.jump_frame_count = 0
-        self.jump_frame = 0 
-        self.is_attacking = False
-        self.is_shielding = False
+        self.jump_frame = 0
         self.attack_frame = 0
         self.shield_frame = 0
+        self.takedamage_frame = 0
+        self.death_frame = 0
 
-        
+        self.is_attacking = False
+        self.is_shielding = False
+        self.is_taking_damage = False
+        self.is_dead = False
+
         self.idle_textures = idle_textures
         self.run_textures = run_textures
         self.jump_textures = jump_textures
         self.fall_textures = fall_textures
         self.attack_textures = attack_textures
         self.shield_textures = shield_textures
+        self.takedamage_textures = takedamage_textures
+        self.death_textures = death_textures
 
-        super().__init__(self.idle_textures[0], scale=PLAYER_SCALING)
         self.max_health = max_health
-        self.current_health = max_health  
-    
+        self.current_health = max_health
+
     def take_damage(self, damage):
+        if self.is_dead:
+            return
+
         self.current_health -= damage
-        if self.current_health <= 0:    
+        if self.current_health <= 0:
             self.current_health = 0
-            self.kill()
+            self.is_dead = True
+            self.death_frame = 0
+        else:
+            self.is_taking_damage = True
+            self.takedamage_frame = 0
 
     def heal(self, amount):
         self.current_health += amount
         if self.current_health > self.max_health:
             self.current_health = self.max_health
 
-
-
     def draw_health_bar(self):
         bar_width = 50
         bar_height = 5
-        # Offset: height of player sprite / 2 + a little extra space
-       
+        y_offset = 14
 
-        bottom = self.center_y +14
+        bottom = self.center_y + y_offset
         top = bottom + bar_height
+        left = self.center_x - bar_width / 2
+        right = left + bar_width
 
-        # Background (red)
-        arcade.draw_lrbt_rectangle_filled(
-            left=self.center_x - bar_width / 2,
-            right=self.center_x + bar_width / 2,
-            bottom=bottom,
-            top=top,
-            color=arcade.color.RED,
-        )
+        # Background bar
+        arcade.draw_lrbt_rectangle_filled(left, right, bottom, top, arcade.color.RED)
 
-        # Current health (green)
+        # Current health
         current_health_width = (self.current_health / self.max_health) * bar_width
-        arcade.draw_lrbt_rectangle_filled(
-            left=self.center_x - bar_width / 2,
-            right=self.center_x - bar_width / 2 + current_health_width,
-            bottom=bottom,
-            top=top,
-            color=arcade.color.GREEN,
-        )
+        arcade.draw_lrbt_rectangle_filled(left, left + current_health_width, bottom, top, arcade.color.GREEN)
 
-    def draw_health_number(self):
+        # Health number
         health_string = f"{self.current_health}/{self.max_health}"
-        arcade.draw_text(
-            health_string,
-            x=self.center_x - 20,
-            y=self.center_y - 35,
-            font_size=10,
-            color=arcade.color.WHITE
-        )
-
-        self.jump_frame = 0  # initialize jump_frame here
+        arcade.draw_text(health_string, x=self.center_x, y=top + 2, font_size=10,
+                         color=arcade.color.WHITE, anchor_x="center")
 
     def start_attack(self):
         if not self.is_attacking:
             self.is_attacking = True
             self.cur_texture = 0
-            
+
     def start_shield(self):
         if not self.is_shielding:
             self.is_shielding = True
-            self.cur_texture = 0       
+            self.cur_texture = 0
 
     def update_animation(self, delta_time: float = 1 / 60):
         if self.change_x < 0:
             self.character_face_direction = LEFT_FACING
         elif self.change_x > 0:
             self.character_face_direction = RIGHT_FACING
+
+        # Death animation
+        if self.is_dead:
+            self.death_frame += 1
+            if self.death_frame >= len(self.death_textures) * UPDATES_PER_FRAME:
+                # Death animation finished, respawn the player
+                self.death_frame = 0
+                self.is_dead = False
+                self.current_health = self.max_health
+                # Reset position or any other respawn logic here
+                self.center_x = 196  # Example respawn position x
+                self.center_y = 270  # Example respawn position y
+
+            else:
+                frame = self.death_frame // UPDATES_PER_FRAME
+                direction = self.character_face_direction
+                self.texture = self.death_textures[frame][direction]
+            return
+
+        # Taking damage animation
+        if self.is_taking_damage:
+            if self.takedamage_frame < len(self.takedamage_textures) * UPDATES_PER_FRAME:
+                frame = self.takedamage_frame // UPDATES_PER_FRAME
+                self.texture = self.takedamage_textures[frame][self.character_face_direction]
+                self.takedamage_frame += 1
+            else:
+                self.is_taking_damage = False
+            return
 
         if self.change_y > 0:  # Moving upward (jumping)
             self.jump_frame += 1
@@ -175,9 +298,6 @@ class PlayerCharacter(arcade.Sprite):
                 direction = self.character_face_direction
                 self.texture = self.shield_textures[frame][direction]
             return
-            
-
-
 
 
 class GameView(arcade.View):
@@ -186,6 +306,7 @@ class GameView(arcade.View):
 
         self.tile_map = None
         self.player_list = None
+        self.enemy_list = arcade.SpriteList()
         self.player = None
         self.wall_list = None
         self.score = 0
@@ -203,7 +324,8 @@ class GameView(arcade.View):
         self.distance_text = arcade.Text("0.0", x=10, y=20, color=arcade.color.WHITE, font_size=14)
 
       
-        character_path = "resources/sprites"
+        character_path = "resources/sprites/blue_player"
+        enemy_path = "resources/sprites/mushroom_enemy"
 
         
         self.run_textures = []
@@ -236,6 +358,42 @@ class GameView(arcade.View):
             shield_textures = arcade.load_texture(f"{character_path}/player_shield/player_shield{i}.png")
             self.shield_textures.append((shield_textures, shield_textures.flip_left_right()))
         
+        self.takedamage_textures = []
+        for i in range(4):
+            tex = arcade.load_texture(f"{character_path}/player_takedamage/player_takedamage{i}.png")
+            self.takedamage_textures.append((tex, tex.flip_left_right()))
+
+        self.death_textures = []
+        for i in range(12):
+            tex = arcade.load_texture(f"{character_path}/player_death/player_death{i}.png")
+            self.death_textures.append((tex, tex.flip_left_right()))
+
+
+        self.enemy_walk_textures = []
+        for i in range(4):  # or however many frames you have
+            tex = arcade.load_texture(f"{enemy_path}/mushroom_idle/mushroom_idle{i}.png")
+            self.enemy_walk_textures.append((tex, tex.flip_left_right()))
+
+        self.enemy_attack_textures = []
+        for i in range(8):
+            tex = arcade.load_texture(f"{enemy_path}/mushroom_attack/mushroom_attack{i}.png")
+            self.enemy_attack_textures.append((tex, tex.flip_left_right()))
+
+        self.enemy_death_textures = []
+        for i in range(4):
+            tex = arcade.load_texture(f"{enemy_path}/mushroom_death/mushroom_death{i}.png")
+            self.enemy_death_textures.append((tex, tex.flip_left_right()))
+
+        self.enemy_takedamage_textures = []
+        for i in range(4):
+            tex = arcade.load_texture(f"{enemy_path}/mushroom_takedamage/mushroom_takedamage{i}.png")
+            self.enemy_takedamage_textures.append((tex, tex.flip_left_right()))
+
+
+
+
+        
+        
         fall = arcade.load_texture(f"{character_path}/player_idle/player_idle1.png")
 
         self.fall_texture_pair = fall, fall.flip_left_right()
@@ -254,10 +412,22 @@ class GameView(arcade.View):
             self.fall_textures,
             self.attack_textures,
             self.shield_textures,
-            )
+            self.takedamage_textures,
+            self.death_textures
+        )
         self.player_sprite.center_x = 196
         self.player_sprite.center_y = 270
         self.player_list.append(self.player_sprite)
+
+        enemy = EnemyCharacter(
+            x=600, y=270,  # position of the enemy
+            left_boundary=500,
+            right_boundary=700,
+            walk_textures=self.enemy_walk_textures,
+            attack_textures=self.enemy_attack_textures,
+            death_textures=self.enemy_death_textures
+        )
+        self.enemy_list.append(enemy)
 
         
         file_path = os.path.dirname(os.path.abspath(__file__))
@@ -325,11 +495,12 @@ class GameView(arcade.View):
         self.player_list.draw()
         self.wall_list.draw()
         self.coin_list.draw()
+        self.enemy_list.draw()
 
         # Draw health bars in world space *before* switching to GUI camera
         for sprite in self.player_list:
             sprite.draw_health_bar()
-            sprite.draw_health_number()
+  
 
         self.gui_camera.use()  # Now switch to screen-space for UI text
 
@@ -371,6 +542,14 @@ class GameView(arcade.View):
         elif key == arcade.key.E:
             self.player_sprite.start_shield()
 
+        elif key == arcade.key.T:  # Press 'T' to take damage
+            self.player_sprite.take_damage(1)
+
+        elif key == arcade.key.Y:  # Press 'Y' to trigger death animation directly
+            self.player_sprite.current_health = 0
+            self.player_sprite.is_dead = True
+            self.player_sprite.death_frame = 0
+
     def on_key_release(self, key, modifiers):
         if key == arcade.key.LEFT or key == arcade.key.RIGHT or key == arcade.key.A or key == arcade.key.D:
             self.player_sprite.change_x = 0
@@ -389,6 +568,11 @@ class GameView(arcade.View):
         for coin in coins_hit:
             coin.remove_from_sprite_lists()
             self.score += 1
+
+        for enemy in self.enemy_list:
+            enemy.update()
+            enemy.detect_player(self.player_sprite)
+            enemy.update_animation(delta_time)
 
         self.pan_camera_to_user(CAMERA_PAN_SPEED)
 
