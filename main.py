@@ -44,12 +44,14 @@ class EnemyCharacter(arcade.Sprite):
         self.death_textures = death_textures
 
         self.is_attacking = False
+        self.is_taking_damage = False
         self.is_dead = False
 
         self.cur_texture = 0
         self.direction = RIGHT_FACING
         self.health = 3
         self.attack_cooldown = 0
+        self.takedamage_frame = 0
 
         self.change_x = 1  # Start moving right
 
@@ -425,6 +427,7 @@ class GameView(arcade.View):
             right_boundary=700,
             walk_textures=self.enemy_walk_textures,
             attack_textures=self.enemy_attack_textures,
+            takedamage_textures=self.enemy_takedamage_textures,
             death_textures=self.enemy_death_textures
         )
         self.enemy_list.append(enemy)
