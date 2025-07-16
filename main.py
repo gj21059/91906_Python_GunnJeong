@@ -36,7 +36,7 @@ class PlayerCharacter(arcade.Sprite):
         self.attack_frame = 0
         self.shield_frame = 0
 
-
+        
         self.idle_textures = idle_textures
         self.run_textures = run_textures
         self.jump_textures = jump_textures
@@ -62,32 +62,39 @@ class PlayerCharacter(arcade.Sprite):
 
 
     def draw_health_bar(self):
-        # Draw the background (unhealthy) bar
-        if self.current_health < self.max_health:
-            arcade.draw_rectangle_filled(
-                center_x=self.center_x,
-                center_y=self.center_y - 20, # Adjust position
-                width=50, # Adjust width
-                height=5, # Adjust height
-                color=arcade.color.RED
-            )
+        bar_width = 50
+        bar_height = 5
+        # Offset: height of player sprite / 2 + a little extra space
+       
 
-        # Draw the current health bar
-        current_health_width = (self.current_health / self.max_health) * 50 # Match background width
-        arcade.draw_rectangle_filled(
-            center_x=self.center_x - (50 - current_health_width) / 2, # Adjust for left alignment
-            center_y=self.center_y - 20,
-            width=current_health_width,
-            height=5,
-            color=arcade.color.GREEN
+        bottom = self.center_y +14
+        top = bottom + bar_height
+
+        # Background (red)
+        arcade.draw_lrbt_rectangle_filled(
+            left=self.center_x - bar_width / 2,
+            right=self.center_x + bar_width / 2,
+            bottom=bottom,
+            top=top,
+            color=arcade.color.RED,
+        )
+
+        # Current health (green)
+        current_health_width = (self.current_health / self.max_health) * bar_width
+        arcade.draw_lrbt_rectangle_filled(
+            left=self.center_x - bar_width / 2,
+            right=self.center_x - bar_width / 2 + current_health_width,
+            bottom=bottom,
+            top=top,
+            color=arcade.color.GREEN,
         )
 
     def draw_health_number(self):
         health_string = f"{self.current_health}/{self.max_health}"
         arcade.draw_text(
             health_string,
-            start_x=self.center_x - 20, # Adjust position
-            start_y=self.center_y - 35, # Adjust position
+            x=self.center_x - 20,
+            y=self.center_y - 35,
             font_size=10,
             color=arcade.color.WHITE
         )
@@ -127,20 +134,25 @@ class PlayerCharacter(arcade.Sprite):
         else:  # On ground (idle or running)
             self.jump_frame = 0  # Reset jump/fall animation
 
-        self.cur_texture += 1
-        if self.cur_texture >= len(self.run_textures) * UPDATES_PER_FRAME:
-            self.cur_texture = 0
-        frame = self.cur_texture // UPDATES_PER_FRAME
-        direction = self.character_face_direction
-        self.texture = self.run_textures[frame][direction]
-
-        if self.change_x == 0 and self.change_y == 0:
+        
+        
+        if self.change_x != 0:
+            self.cur_texture += 1
+            if self.cur_texture >= len(self.run_textures) * UPDATES_PER_FRAME:
+                self.cur_texture = 0
+            frame = self.cur_texture // UPDATES_PER_FRAME
+            direction = self.character_face_direction
+            self.texture = self.run_textures[frame][direction]
+        else:
+            # Idle animation
             self.cur_texture += 1
             if self.cur_texture >= len(self.idle_textures) * IDLE_UPDATES_PER_FRAME:
                 self.cur_texture = 0
             frame = self.cur_texture // IDLE_UPDATES_PER_FRAME
             direction = self.character_face_direction
             self.texture = self.idle_textures[frame][direction]
+
+
 
         if self.is_attacking:
             self.attack_frame += 1
@@ -235,6 +247,7 @@ class GameView(arcade.View):
         self.player_list = arcade.SpriteList()
 
         self.player_sprite = PlayerCharacter(
+            PLAYER_HEALTH,
             self.idle_textures,
             self.run_textures,
             self.jump_textures,
@@ -300,9 +313,8 @@ class GameView(arcade.View):
         self.game_over = False
 
     def on_draw(self):
-        self.camera.use()
+        self.camera.use()  # World coordinate system for game world and player
         self.clear()
-
 
         self.scene["Background"].draw()
         self.scene["Midground"].draw()
@@ -312,10 +324,14 @@ class GameView(arcade.View):
 
         self.player_list.draw()
         self.wall_list.draw()
-        # Draw coin_list only if you have coins (empty here so safe)
         self.coin_list.draw()
 
-        self.gui_camera.use()
+        # Draw health bars in world space *before* switching to GUI camera
+        for sprite in self.player_list:
+            sprite.draw_health_bar()
+            sprite.draw_health_number()
+
+        self.gui_camera.use()  # Now switch to screen-space for UI text
 
         if self.last_time and self.frame_count % 60 == 0:
             fps = round(1.0 / (time.time() - self.last_time) * 60)
@@ -338,6 +354,7 @@ class GameView(arcade.View):
                 arcade.color.BLACK,
                 30,
             )
+
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.UP or key == arcade.key.W:
