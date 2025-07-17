@@ -3,7 +3,7 @@ import arcade
 import os
 
 TILE_SCALING = 3
-PLAYER_SCALING = 2.5
+PLAYER_SCALING = 2.2
 ENEMY_SCALING = 2
 
 WINDOW_WIDTH = 1280
@@ -70,7 +70,7 @@ class EnemyCharacter(arcade.Sprite):
             self.change_x = -1
             self.direction = LEFT_FACING
 
-        # Cooldown handling (optional)
+
         if self.attack_cooldown > 0:
             self.attack_cooldown -= 1
 
