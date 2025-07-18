@@ -133,8 +133,6 @@ class EnemyCharacter(arcade.Sprite):
             self.cur_texture = 0
 
 
-    
-
 class PlayerCharacter(arcade.Sprite):
     def __init__(self, max_health, idle_textures, run_textures, jump_textures, fall_textures,
                  attack_textures, shield_textures, takedamage_textures, death_textures):
@@ -330,6 +328,9 @@ class GameView(arcade.View):
         self.camera_bounds = None
         self.gui_camera = None
 
+        self.hit_box_base_colour = (255, 255, 255, 255)
+        self.hit_box_collision_colour = (255, 0, 0, 255)
+        self.colliding = False
         self.fps_text = arcade.Text("", x=10, y=40, color=arcade.color.WHITE, font_size=14)
         self.distance_text = arcade.Text("0.0", x=10, y=20, color=arcade.color.WHITE, font_size=14)
 
@@ -511,6 +512,18 @@ class GameView(arcade.View):
         # Draw health bars in world space *before* switching to GUI camera
         for sprite in self.player_list:
             sprite.draw_health_bar()
+
+        if self.colliding:
+            self.sprite_list.draw_hit_boxes(self.hit_box_collision_colour)
+            arcade.draw_text(
+                "Colliding with enemy!",
+                self.player_sprite.center_x,
+                self.player_sprite.center_y + 20,
+                arcade.color.RED,
+                font_size=24,
+            )
+        else:
+            self.player_list.draw_hit_boxes(self.hit_box_base_colour)
   
 
         self.gui_camera.use()  # Now switch to screen-space for UI text
@@ -569,6 +582,8 @@ class GameView(arcade.View):
         if self.player_sprite.right >= self.end_of_map:
             self.game_over = True
 
+
+
         if not self.game_over:
             self.physics_engine.update()
             self.player_sprite.update_animation(delta_time)
@@ -581,9 +596,17 @@ class GameView(arcade.View):
             self.score += 1
 
         for enemy in self.enemy_list:
+            if arcade.check_for_collision_with_list(self.player_sprite, enemy):
+                self.colliding = True
+            else:
+                self.colliding = False
             enemy.update()
             enemy.detect_player(self.player_sprite)
             enemy.update_animation(delta_time)
+            
+            enemy.hit_box_base_colour = (255, 255, 255, 255)
+            enemy.hit_box_collision_colour = (255, 0, 0, 255)
+            enemy.colliding = False
 
         self.pan_camera_to_user(CAMERA_PAN_SPEED)
 
