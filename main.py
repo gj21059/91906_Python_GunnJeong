@@ -111,44 +111,42 @@ class EnemyCharacter(arcade.Sprite):
 
 
     def detect_player(self, player_sprite):
-        # Calculate distances and direction
         raw_x = player_sprite.center_x - self.center_x
         distance_x = abs(raw_x)
         distance_y = abs(player_sprite.center_y - self.center_y)
         
-        # Check if player is within patrol boundaries
         player_in_boundaries = (
             self.left_boundary <= player_sprite.center_x <= self.right_boundary
         )
 
-        # STATE 1: ATTACKING (priority)
         if self.is_attacking:
-            # Lock movement during attack animation
             self.change_x = 0
-            return  # Skip other logic until attack finishes
+            return 
 
-        # STATE 2: PLAYER IN BOUNDARIES
         if player_in_boundaries:
-            # Face player immediately
-            self.direction = LEFT_FACING if raw_x < 0 else RIGHT_FACING
+            if raw_x < 0:
+                self.direction = LEFT_FACING
+            else:
+                self.direction = RIGHT_FACING
             
-            # Check attack range
-            if distance_x < 30 and distance_y < 40:
+            if distance_x < 40 and distance_y < 40:
                 if self.attack_cooldown <= 0:
                     self.is_attacking = True
                     self.change_x = 0
-                    self.cur_texture = 0  # Reset attack animation
+                    self.cur_texture = 0  
             else:
-                # Chase player (with speed limit)
-                chase_speed = 1.5
-                self.change_x = -chase_speed if raw_x < 0 else chase_speed
-                
-                # Respect patrol boundaries
-                if (self.change_x < 0 and self.center_x <= self.left_boundary) or \
-                (self.change_x > 0 and self.center_x >= self.right_boundary):
-                    self.change_x = 0
+                chase_speed = 4
+                if raw_x < 0:
+                    self.change_x = -chase_speed  
+                else:
+                    self.change_x = chase_speed  
+       
+               # if self.change_x < 0 and self.center_x <= self.left_boundary:
+                #    self.change_x = 0
 
-        # STATE 3: DEFAULT PATROL
+
+              #  if self.change_x > 0 and self.center_x >= self.right_boundary:
+               #    self.change_x = 0
         else:
             if self.direction == RIGHT_FACING:
                 self.change_x = 1
@@ -468,7 +466,7 @@ class GameView(arcade.View):
         enemy = EnemyCharacter(
             x=600, y=270,  # position of the enemy
             left_boundary=500,
-            right_boundary=700,
+            right_boundary=1000,
             walk_textures=self.enemy_walk_textures,
             attack_textures=self.enemy_attack_textures,
             takedamage_textures=self.enemy_takedamage_textures,
