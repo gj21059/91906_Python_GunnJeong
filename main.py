@@ -109,22 +109,55 @@ class EnemyCharacter(arcade.Sprite):
         frame = self.cur_texture // UPDATES_PER_FRAME
         self.texture = self.walk_textures[frame][self.direction]
 
+
     def detect_player(self, player_sprite):
-        distance_x = abs(player_sprite.center_x - self.center_x)
+        # Calculate distances and direction
+        raw_x = player_sprite.center_x - self.center_x
+        distance_x = abs(raw_x)
         distance_y = abs(player_sprite.center_y - self.center_y)
         
-        if distance_x < 80 and distance_y < 40:
-            # Only start attack if not already attacking
-            if not self.is_attacking and self.attack_cooldown <= 0:
-                self.is_attacking = True
-                self.cur_texture = 0  # Reset animation only when starting attack
-                self.change_x = 0     # Stop moving
+        # Check if player is within patrol boundaries
+        player_in_boundaries = (
+            self.left_boundary <= player_sprite.center_x <= self.right_boundary
+        )
+
+        # STATE 1: ATTACKING (priority)
+        if self.is_attacking:
+            # Lock movement during attack animation
+            self.change_x = 0
+            return  # Skip other logic until attack finishes
+
+        # STATE 2: PLAYER IN BOUNDARIES
+        if player_in_boundaries:
+            # Face player immediately
+            self.direction = LEFT_FACING if raw_x < 0 else RIGHT_FACING
+            
+            # Check attack range
+            if distance_x < 30 and distance_y < 40:
+                if self.attack_cooldown <= 0:
+                    self.is_attacking = True
+                    self.change_x = 0
+                    self.cur_texture = 0  # Reset attack animation
+            else:
+                # Chase player (with speed limit)
+                chase_speed = 1.5
+                self.change_x = -chase_speed if raw_x < 0 else chase_speed
                 
-        elif not self.is_attacking:  # Only resume patrol if not attacking
+                # Respect patrol boundaries
+                if (self.change_x < 0 and self.center_x <= self.left_boundary) or \
+                (self.change_x > 0 and self.center_x >= self.right_boundary):
+                    self.change_x = 0
+
+        # STATE 3: DEFAULT PATROL
+        else:
             if self.direction == RIGHT_FACING:
                 self.change_x = 1
+                if self.center_x >= self.right_boundary:
+                    self.direction = LEFT_FACING
             else:
                 self.change_x = -1
+                if self.center_x <= self.left_boundary:
+                    self.direction = RIGHT_FACING
 
     def take_damage(self, amount):
         self.health -= amount
@@ -194,6 +227,7 @@ class PlayerCharacter(arcade.Sprite):
 
         # Background bar
         arcade.draw_lrbt_rectangle_filled(left, right, bottom, top, arcade.color.RED)
+        
 
         # Current health
         current_health_width = (self.current_health / self.max_health) * bar_width
@@ -286,6 +320,7 @@ class PlayerCharacter(arcade.Sprite):
 
 
         if self.is_attacking:
+            self.change_x = 0  # Lock movement during attack
             self.attack_frame += 1
             if self.attack_frame >= len(self.attack_textures) * UPDATES_PER_FRAME:
                 self.attack_frame = 0
@@ -513,8 +548,29 @@ class GameView(arcade.View):
         for sprite in self.player_list:
             sprite.draw_health_bar()
 
+            for enemy in self.enemy_list:
+        # Left boundary (red line)
+                arcade.draw_line(
+                    enemy.left_boundary, enemy.center_y - 50,
+                    enemy.left_boundary, enemy.center_y + 50,
+                    arcade.color.RED, 2
+                )
+                # Right boundary (green line)
+                arcade.draw_line(
+                    enemy.right_boundary, enemy.center_y - 50,
+                    enemy.right_boundary, enemy.center_y + 50,
+                    arcade.color.GREEN, 2
+                )
+                # Current path (blue line between boundaries)
+                arcade.draw_line(
+                    enemy.left_boundary, enemy.center_y,
+                    enemy.right_boundary, enemy.center_y,
+                    arcade.color.BLUE, 1
+                )
+            
+
         if self.colliding:
-            self.sprite_list.draw_hit_boxes(self.hit_box_collision_colour)
+            self.player_list.draw_hit_boxes(self.hit_box_collision_colour)
             arcade.draw_text(
                 "Colliding with enemy!",
                 self.player_sprite.center_x,
@@ -596,17 +652,14 @@ class GameView(arcade.View):
             self.score += 1
 
         for enemy in self.enemy_list:
-            if arcade.check_for_collision_with_list(self.player_sprite, enemy):
+            if arcade.check_for_collision_with_list(self.player_sprite, self.enemy_list):
                 self.colliding = True
             else:
                 self.colliding = False
             enemy.update()
             enemy.detect_player(self.player_sprite)
             enemy.update_animation(delta_time)
-            
-            enemy.hit_box_base_colour = (255, 255, 255, 255)
-            enemy.hit_box_collision_colour = (255, 0, 0, 255)
-            enemy.colliding = False
+      
 
         self.pan_camera_to_user(CAMERA_PAN_SPEED)
 
