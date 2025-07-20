@@ -13,11 +13,16 @@ SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
 CAMERA_PAN_SPEED = 0.30
 
-PLAYER_HEALTH = 5
+PLAYER_HEALTH = 10
+PLAYER_ATTACK_DAMAGE = 1
+MUSHROOM_ENEMY_HEALTH = 3
+MUSHROOM_ENEMY_DAMAGE = 1
 RIGHT_FACING = 0
 LEFT_FACING = 1
 
-
+PLAYER_ATTACK_RANGE = 80
+PLAYER_ATTACK_HEIGHT = 40
+PLAYER_ATTACK_FRAME = 4
 # Physics
 MOVEMENT_SPEED = 5
 UPDATES_PER_FRAME = 5
@@ -30,11 +35,13 @@ GRAVITY = 1.1
 
 
 class EnemyCharacter(arcade.Sprite):
-    def __init__(self, x, y, left_boundary, right_boundary, walk_textures, attack_textures, takedamage_textures, death_textures):
+    def __init__(self, x, y, max_health, left_boundary, right_boundary, walk_textures, attack_textures, takedamage_textures, death_textures):
         super().__init__(walk_textures[0][0], scale=ENEMY_SCALING)
         self.center_x = x
         self.center_y = y
 
+
+        self.max_health = max_health
         self.left_boundary = left_boundary
         self.right_boundary = right_boundary
         self.walk_textures = walk_textures
@@ -49,14 +56,42 @@ class EnemyCharacter(arcade.Sprite):
 
         self.cur_texture = 0
         self.direction = RIGHT_FACING
-        self.health = 3
         self.attack_cooldown = 0
         self.takedamage_frame = 0
         self.attack_cooldown = 0
         self.attack_cooldown_max = 60
+        self.attack_damage_frame = 0
+ 
+        self.has_dealt_damage = False
+        self.current_health = max_health
 
         self.change_x = 1  # Start moving right
 
+    def draw_health_bar(self):
+        if self.is_dead:
+            return
+        
+        bar_width = 50
+        bar_height = 5
+        y_offset = 14
+
+        bottom = self.center_y + y_offset
+        top = bottom + bar_height
+        left = self.center_x - bar_width / 2
+        right = left + bar_width
+
+        # Background bar
+        arcade.draw_lrbt_rectangle_filled(left, right, bottom, top, arcade.color.RED)
+        
+
+        # Current health
+        current_health_width = (self.current_health / self.max_health) * bar_width
+        arcade.draw_lrbt_rectangle_filled(left, left + current_health_width, bottom, top, arcade.color.GREEN)
+
+        # Health number
+        health_string = f"{self.current_health}/{self.max_health}"
+        arcade.draw_text(health_string, x=self.center_x, y=top + 2, font_size=10,
+                        color=arcade.color.WHITE, anchor_x="center")
     def update(self):
         if self.is_dead:
             return
@@ -80,9 +115,21 @@ class EnemyCharacter(arcade.Sprite):
             self.texture = self.death_textures[frame][self.direction]
             self.cur_texture += 1
             return
+        
+
+        if self.is_taking_damage:
+            if self.takedamage_frame < len(self.takedamage_textures) * UPDATES_PER_FRAME:
+                frame = self.takedamage_frame // UPDATES_PER_FRAME
+                self.texture = self.takedamage_textures[frame][self.direction]
+                self.takedamage_frame += 1
+            else:
+                self.is_taking_damage = False
+            return
+
 
         if self.is_attacking:
-            frame = self.cur_texture // UPDATES_PER_FRAME
+            frame = self.cur_texture // UPDATES_PER_FRAME 
+            
             if frame >= len(self.attack_textures):
                 self.cur_texture = 0
                 self.is_attacking = False
@@ -90,17 +137,11 @@ class EnemyCharacter(arcade.Sprite):
             else:
                 self.texture = self.attack_textures[frame][self.direction]
                 self.cur_texture += 1
+                
+                
             return
         
 
-        if self.is_taking_damage:
-            if self.takedamage_frame < len(self.takedamage_textures) * UPDATES_PER_FRAME:
-                frame = self.takedamage_frame // UPDATES_PER_FRAME
-                self.texture = self.takedamage_textures[frame][self.character_face_direction]
-                self.takedamage_frame += 1
-            else:
-                self.is_taking_damage = False
-            return
 
         # Walking
         self.cur_texture += 1
@@ -110,7 +151,10 @@ class EnemyCharacter(arcade.Sprite):
         self.texture = self.walk_textures[frame][self.direction]
 
 
+
     def detect_player(self, player_sprite):
+        if self.is_dead:
+            return
         raw_x = player_sprite.center_x - self.center_x
         distance_x = abs(raw_x)
         distance_y = abs(player_sprite.center_y - self.center_y)
@@ -118,9 +162,22 @@ class EnemyCharacter(arcade.Sprite):
         player_in_boundaries = (
             self.left_boundary <= player_sprite.center_x <= self.right_boundary
         )
+        current_frame = self.cur_texture // UPDATES_PER_FRAME
 
         if self.is_attacking:
             self.change_x = 0
+            
+            
+            if current_frame == 6 and not self.has_dealt_damage:
+                if distance_x < 50 and distance_y < 50:  
+                    if player_sprite.invulnerable_timer <= 0:
+                        player_sprite.take_damage(MUSHROOM_ENEMY_DAMAGE)
+                        self.has_dealt_damage = True  
+            
+            # Reset the flag when attack animation ends
+            if current_frame >= len(self.attack_textures) - 1:
+                self.has_dealt_damage = False
+                
             return 
 
         if player_in_boundaries:
@@ -129,11 +186,12 @@ class EnemyCharacter(arcade.Sprite):
             else:
                 self.direction = RIGHT_FACING
             
-            if distance_x < 40 and distance_y < 40:
+            if distance_x < 50 and distance_y < 40:
                 if self.attack_cooldown <= 0:
                     self.is_attacking = True
                     self.change_x = 0
-                    self.cur_texture = 0  
+                    self.cur_texture = 0 
+                      
             else:
                 chase_speed = 4
                 if raw_x < 0:
@@ -158,15 +216,22 @@ class EnemyCharacter(arcade.Sprite):
                     self.direction = RIGHT_FACING
 
     def take_damage(self, amount):
-        self.health -= amount
-        if self.health <= 0:
+        if self.is_dead:
+            return
+        self.current_health -= amount
+        self.is_taking_damage = True
+        self.takedamage_frame = 0
+        self.is_attacking = False
+        
+        if self.current_health <= 0:
             self.is_dead = True
             self.cur_texture = 0
+             
 
 
 class PlayerCharacter(arcade.Sprite):
     def __init__(self, max_health, idle_textures, run_textures, jump_textures, fall_textures,
-                 attack_textures, shield_textures, takedamage_textures, death_textures):
+                 attack_textures, shield_textures, takedamage_textures, death_textures, enemy_list):
         super().__init__(idle_textures[0][0], scale=PLAYER_SCALING)
 
         self.character_face_direction = RIGHT_FACING
@@ -177,6 +242,8 @@ class PlayerCharacter(arcade.Sprite):
         self.shield_frame = 0
         self.takedamage_frame = 0
         self.death_frame = 0
+        self.invulnerable_timer = 0
+        
 
         self.is_attacking = False
         self.is_shielding = False
@@ -191,15 +258,29 @@ class PlayerCharacter(arcade.Sprite):
         self.shield_textures = shield_textures
         self.takedamage_textures = takedamage_textures
         self.death_textures = death_textures
+        self.normal_hit_box = self.hit_box
+
+        self.enemy_list = enemy_list  # Store reference to enemy list
+        self.attack_range = PLAYER_ATTACK_RANGE
+        self.attack_height = PLAYER_ATTACK_HEIGHT 
+        self.has_dealt_damage = False
+        self.attack_damage_frame = PLAYER_ATTACK_FRAME
 
         self.max_health = max_health
         self.current_health = max_health
+    
+    
 
     def take_damage(self, damage):
-        if self.is_dead:
+        if self.is_dead or self.invulnerable_timer > 0:
             return
 
         self.current_health -= damage
+        self.invulnerable_timer = 60 # Set invulnerability for 1 second (60 frames)
+        self.is_taking_damage = True
+        self.takedamage_frame = 0
+
+
         if self.current_health <= 0:
             self.current_health = 0
             self.is_dead = True
@@ -246,11 +327,15 @@ class PlayerCharacter(arcade.Sprite):
             self.is_shielding = True
             self.cur_texture = 0
 
+
     def update_animation(self, delta_time: float = 1 / 60):
         if self.change_x < 0:
             self.character_face_direction = LEFT_FACING
         elif self.change_x > 0:
             self.character_face_direction = RIGHT_FACING
+
+        if self.invulnerable_timer > 0:
+            self.invulnerable_timer -= 1
 
         # Death animation
         if self.is_dead:
@@ -298,7 +383,6 @@ class PlayerCharacter(arcade.Sprite):
             self.jump_frame = 0  # Reset jump/fall animation
 
         
-        
         if self.change_x != 0:
             self.cur_texture += 1
             if self.cur_texture >= len(self.run_textures) * UPDATES_PER_FRAME:
@@ -318,16 +402,37 @@ class PlayerCharacter(arcade.Sprite):
 
 
         if self.is_attacking:
-            self.change_x = 0  # Lock movement during attack
+            self.change_x = 0  # Lock movement
+            current_frame = self.attack_frame // UPDATES_PER_FRAME
+
+            # SIMPLIFIED DAMAGE CHECK - uses direct distance comparison
+            if current_frame == self.attack_damage_frame and not self.has_dealt_damage:
+                for enemy in self.enemy_list:
+                    # Calculate distances
+                    horizontal_range = abs(enemy.center_x - self.center_x)
+                    vertical_range = abs(enemy.center_y - self.center_y)
+                    
+                    # Check if enemy is within attack range and in facing direction
+                    if (horizontal_range < self.attack_range and 
+                        vertical_range < self.attack_height and
+                        ((self.character_face_direction == RIGHT_FACING and enemy.center_x > self.center_x) or
+                         (self.character_face_direction == LEFT_FACING and enemy.center_x < self.center_x))):
+                        enemy.take_damage(PLAYER_ATTACK_DAMAGE)
+                self.has_dealt_damage = True
+            elif current_frame != self.attack_damage_frame:
+                self.has_dealt_damage = False  # Reset for next attack
+
+            # Animation progression
             self.attack_frame += 1
             if self.attack_frame >= len(self.attack_textures) * UPDATES_PER_FRAME:
                 self.attack_frame = 0
                 self.is_attacking = False
             else:
-                frame = self.attack_frame // UPDATES_PER_FRAME
-                direction = self.character_face_direction
-                self.texture = self.attack_textures[frame][direction]
-            return  # Make sure to return so other animations don't override it
+                self.texture = self.attack_textures[current_frame][self.character_face_direction]
+            return
+
+
+
         
         if self.is_shielding:
             self.shield_frame += 1
@@ -447,6 +552,7 @@ class GameView(arcade.View):
 
     def setup(self):
         self.player_list = arcade.SpriteList()
+        self.enemy_list = arcade.SpriteList()
 
         self.player_sprite = PlayerCharacter(
             PLAYER_HEALTH,
@@ -457,7 +563,8 @@ class GameView(arcade.View):
             self.attack_textures,
             self.shield_textures,
             self.takedamage_textures,
-            self.death_textures
+            self.death_textures,
+            self.enemy_list
         )
         self.player_sprite.center_x = 196
         self.player_sprite.center_y = 270
@@ -467,6 +574,7 @@ class GameView(arcade.View):
             x=600, y=270,  # position of the enemy
             left_boundary=500,
             right_boundary=1000,
+            max_health=MUSHROOM_ENEMY_HEALTH,
             walk_textures=self.enemy_walk_textures,
             attack_textures=self.enemy_attack_textures,
             takedamage_textures=self.enemy_takedamage_textures,
@@ -480,6 +588,8 @@ class GameView(arcade.View):
 
         layer_options = {
             "floor": {"use_spatial_hash": True},
+
+            "Background_Filler": {"use_spatial_hash": False},
 
             "Background": {"use_spatial_hash": False},
 
@@ -497,6 +607,7 @@ class GameView(arcade.View):
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
 
         self.wall_list = self.tile_map.sprite_lists["floor"]
+        self.background_filler = self.scene["Background_Filler"]
         self.background = self.scene["Background"]
         self.midground = self.scene["Midground"]
         self.foreground = self.scene["Foreground"]
@@ -531,6 +642,7 @@ class GameView(arcade.View):
         self.camera.use()  # World coordinate system for game world and player
         self.clear()
 
+        self.scene["Background_Filler"].draw()
         self.scene["Background"].draw()
         self.scene["Midground"].draw()
         self.scene["Foreground"].draw()
@@ -546,26 +658,28 @@ class GameView(arcade.View):
         for sprite in self.player_list:
             sprite.draw_health_bar()
 
-            for enemy in self.enemy_list:
-        # Left boundary (red line)
-                arcade.draw_line(
-                    enemy.left_boundary, enemy.center_y - 50,
-                    enemy.left_boundary, enemy.center_y + 50,
-                    arcade.color.RED, 2
-                )
-                # Right boundary (green line)
-                arcade.draw_line(
-                    enemy.right_boundary, enemy.center_y - 50,
-                    enemy.right_boundary, enemy.center_y + 50,
-                    arcade.color.GREEN, 2
-                )
-                # Current path (blue line between boundaries)
-                arcade.draw_line(
-                    enemy.left_boundary, enemy.center_y,
-                    enemy.right_boundary, enemy.center_y,
-                    arcade.color.BLUE, 1
-                )
-            
+
+        for enemy in self.enemy_list:
+    # Left boundary (red line)
+            enemy.draw_health_bar()
+            arcade.draw_line(
+                enemy.left_boundary, enemy.center_y - 50,
+                enemy.left_boundary, enemy.center_y + 50,
+                arcade.color.RED, 2
+            )
+            # Right boundary (green line)
+            arcade.draw_line(
+                enemy.right_boundary, enemy.center_y - 50,
+                enemy.right_boundary, enemy.center_y + 50,
+                arcade.color.GREEN, 2
+            )
+            # Current path (blue line between boundaries)
+            arcade.draw_line(
+                enemy.left_boundary, enemy.center_y,
+                enemy.right_boundary, enemy.center_y,
+                arcade.color.BLUE, 1
+            )
+        
 
         if self.colliding:
             self.player_list.draw_hit_boxes(self.hit_box_collision_colour)
@@ -576,6 +690,7 @@ class GameView(arcade.View):
                 arcade.color.RED,
                 font_size=24,
             )
+            
         else:
             self.player_list.draw_hit_boxes(self.hit_box_base_colour)
   
@@ -638,6 +753,9 @@ class GameView(arcade.View):
 
 
 
+      
+
+
         if not self.game_over:
             self.physics_engine.update()
             self.player_sprite.update_animation(delta_time)
@@ -650,13 +768,13 @@ class GameView(arcade.View):
             self.score += 1
 
         for enemy in self.enemy_list:
-            if arcade.check_for_collision_with_list(self.player_sprite, self.enemy_list):
-                self.colliding = True
-            else:
-                self.colliding = False
             enemy.update()
-            enemy.detect_player(self.player_sprite)
+            enemy.detect_player(self.player_sprite) 
             enemy.update_animation(delta_time)
+        
+
+
+
       
 
         self.pan_camera_to_user(CAMERA_PAN_SPEED)
