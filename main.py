@@ -570,23 +570,26 @@ class GameView(arcade.View):
         self.player_sprite.center_y = 270
         self.player_list.append(self.player_sprite)
 
-        enemy = EnemyCharacter(
-            x=600, y=270,  # position of the enemy
-            left_boundary=500,
-            right_boundary=1000,
-            max_health=MUSHROOM_ENEMY_HEALTH,
-            walk_textures=self.enemy_walk_textures,
-            attack_textures=self.enemy_attack_textures,
-            takedamage_textures=self.enemy_takedamage_textures,
-            death_textures=self.enemy_death_textures
-        )
-        self.enemy_list.append(enemy)
+       # enemy = EnemyCharacter(
+          #  x=600, y=270,  # position of the enemy
+            #left_boundary=500,
+           # right_boundary=1000,
+           # max_health=MUSHROOM_ENEMY_HEALTH,
+          #  walk_textures=self.enemy_walk_textures,
+         #   attack_textures=self.enemy_attack_textures,
+        #    takedamage_textures=self.enemy_takedamage_textures,
+       #     death_textures=self.enemy_death_textures
+      #  )
+       # self.enemy_list.append(enemy)
 
         
         file_path = os.path.dirname(os.path.abspath(__file__))
         map_path = os.path.join(file_path, "resources/maps/testmap.tmx")   
 
         layer_options = {
+
+            "Mushroom_Enemies": {"use_spatial_hash": True},
+
             "floor": {"use_spatial_hash": True},
 
             "Background_Filler": {"use_spatial_hash": False},
@@ -603,7 +606,10 @@ class GameView(arcade.View):
         scaling=TILE_SCALING,
         layer_options=layer_options,
         )
+
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
+        self.load_enemies_from_map()
+
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
 
         self.wall_list = self.tile_map.sprite_lists["floor"]
@@ -718,6 +724,34 @@ class GameView(arcade.View):
                 arcade.color.BLACK,
                 30,
             )
+
+    def load_enemies_from_map(self):
+        if "Mushroom_Enemies" not in self.tile_map.object_lists:
+            return
+        
+        enemy_layer = self.tile_map.object_lists["Mushroom_Enemies"]
+
+        for enemy_obj in enemy_layer:
+            position_x = enemy_obj.shape[0]  # or enemy_obj.shape.x in newer versions
+            position_y = enemy_obj.shape[1]  # or enemy_obj.shape.y
+
+
+            left_boundary = enemy_obj.properties.get("left_boundary", position_x - 100)
+            right_boundary = enemy_obj.properties.get("right_boundary", position_x + 100)
+
+            enemy = EnemyCharacter(
+                x=position_x,
+                y=0,  # will set below
+                left_boundary=left_boundary,
+                right_boundary=right_boundary,
+                max_health=MUSHROOM_ENEMY_HEALTH,
+                walk_textures= self.enemy_walk_textures,
+                attack_textures=self.enemy_attack_textures,
+                takedamage_textures=self.enemy_takedamage_textures,
+                death_textures=self.enemy_death_textures
+            )
+            enemy.bottom = position_y 
+            self.enemy_list.append(enemy)
 
 
     def on_key_press(self, key, modifiers):

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="24" tileheight="24" infinite="0" nextlayerid="10" nextobjectid="51">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="24" tileheight="24" infinite="0" nextlayerid="11" nextobjectid="66">
  <tileset firstgid="1" source="../oak_woods_tileset.tsx"/>
  <tileset firstgid="316" name="Backgrounds" tilewidth="320" tileheight="180" tilecount="3" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
@@ -82,4 +82,51 @@
 23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,46,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,64,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="10" name="Mushroom_Enemies">
+  <object id="52" x="600" y="360">
+   <point/>
+  </object>
+  <object id="53" x="288" y="408">
+   <properties>
+    <property name="type" value="MushroomEnemy"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="54" x="1536" y="360">
+   <point/>
+  </object>
+  <object id="55" x="1776" y="360">
+   <point/>
+  </object>
+  <object id="56" x="1176" y="264">
+   <point/>
+  </object>
+  <object id="57" x="1608" y="360">
+   <point/>
+  </object>
+  <object id="58" x="1680" y="360">
+   <point/>
+  </object>
+  <object id="59" x="1728" y="360">
+   <point/>
+  </object>
+  <object id="60" x="1656" y="360">
+   <point/>
+  </object>
+  <object id="61" x="1560" y="360">
+   <point/>
+  </object>
+  <object id="62" x="1488" y="360">
+   <point/>
+  </object>
+  <object id="63" x="1584" y="360">
+   <point/>
+  </object>
+  <object id="64" x="1632" y="360">
+   <point/>
+  </object>
+  <object id="65" x="1800" y="360">
+   <point/>
+  </object>
+ </objectgroup>
 </map>
