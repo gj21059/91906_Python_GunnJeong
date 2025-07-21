@@ -3,7 +3,7 @@ import arcade
 import os
 
 # Constants
-TILE_SCALING = 3
+TILE_SCALING = 2.5
 PLAYER_SCALING = 2.2
 ENEMY_SCALING = 2
 
@@ -501,6 +501,7 @@ class GameView(arcade.View):
         layer_options = {
             "Mushroom_Enemies": {"use_spatial_hash": True},
             "floor": {"use_spatial_hash": True},
+            "Decorations": {"use_spatial_hash": False},
             "Background_Filler": {"use_spatial_hash": False},
             "Background": {"use_spatial_hash": False},
             "Midground": {"use_spatial_hash": False},
@@ -513,6 +514,7 @@ class GameView(arcade.View):
 
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
         self.wall_list = self.tile_map.sprite_lists["floor"]
+        self.decorations = self.tile_map.sprite_lists["Decorations"]
         self.background_filler = self.scene["Background_Filler"]
         self.background = self.scene["Background"]
         self.midground = self.scene["Midground"]
@@ -576,6 +578,7 @@ class GameView(arcade.View):
         self.scene["Background"].draw()
         self.scene["Midground"].draw()
         self.scene["Foreground"].draw()
+        self.scene["Decorations"].draw()
 
         self.frame_count += 1
 

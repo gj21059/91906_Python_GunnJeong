@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="24" tileheight="24" infinite="0" nextlayerid="12" nextobjectid="66">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="24" tileheight="24" infinite="0" nextlayerid="13" nextobjectid="157">
  <tileset firstgid="1" source="../oak_woods_tileset.tsx"/>
  <tileset firstgid="316" name="Backgrounds" tilewidth="708" tileheight="180" tilecount="15" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
@@ -49,7 +49,6 @@
    <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/sign.png" width="22" height="31"/>
   </tile>
  </tileset>
- <tileset firstgid="331" name="Decorations" tilewidth="1" tileheight="1" tilecount="0" columns="0"/>
  <objectgroup id="6" name="Background">
   <object id="26" gid="316" x="0" y="408" width="480" height="312"/>
   <object id="38" gid="316" x="480" y="408" width="480" height="312"/>
@@ -165,5 +164,52 @@
   <object id="65" x="1800" y="360">
    <point/>
   </object>
+  <object id="66" x="1608" y="360">
+   <point/>
+  </object>
+  <object id="67" x="1608" y="360">
+   <point/>
+  </object>
+  <object id="68" x="1608" y="360">
+   <point/>
+  </object>
+  <object id="69" x="1608" y="360">
+   <point/>
+  </object>
+  <object id="70" x="1632" y="360">
+   <point/>
+  </object>
+  <object id="71" x="1632" y="360">
+   <point/>
+  </object>
+  <object id="72" x="1512" y="360">
+   <point/>
+  </object>
+  <object id="73" x="1704" y="360">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="12" name="Decorations">
+  <object id="136" gid="328" x="24" y="408" width="118" height="98"/>
+  <object id="137" gid="324" x="168" y="408" width="23" height="57"/>
+  <object id="138" gid="330" x="792" y="312" width="22" height="31"/>
+  <object id="139" gid="322" x="288" y="408" width="10" height="5"/>
+  <object id="140" gid="322" x="216" y="408" width="10" height="5"/>
+  <object id="141" gid="322" x="240" y="408" width="10" height="5"/>
+  <object id="142" gid="322" x="528" y="360" width="10" height="5"/>
+  <object id="143" gid="322" x="624" y="360" width="10" height="5"/>
+  <object id="144" gid="322" x="696" y="360" width="10" height="5"/>
+  <object id="145" gid="322" x="672" y="360" width="10" height="5"/>
+  <object id="146" gid="321" x="648" y="360" width="8" height="3"/>
+  <object id="147" gid="321" x="720" y="360" width="8" height="3"/>
+  <object id="148" gid="321" x="1440" y="360" width="8" height="3"/>
+  <object id="149" gid="321" x="1464" y="360" width="8" height="3"/>
+  <object id="150" gid="321" x="1464" y="360" width="8" height="3"/>
+  <object id="151" gid="321" x="1512" y="360" width="8" height="3"/>
+  <object id="152" gid="321" x="1560" y="360" width="8" height="3"/>
+  <object id="153" gid="321" x="1656" y="360" width="8" height="3"/>
+  <object id="154" gid="321" x="1704" y="360" width="8" height="3"/>
+  <object id="155" gid="321" x="1584" y="360" width="8" height="3"/>
+  <object id="156" gid="326" x="1440" y="360" width="27" height="12"/>
  </objectgroup>
 </map>
