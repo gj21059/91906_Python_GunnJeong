@@ -6,7 +6,7 @@ import os
 
 # Things to do: Add a timer, add death/intro/start screen, add a score system, find an asset for going to new levels
 
-
+# every funtion needs a 
 
 
 # Constants
@@ -21,7 +21,7 @@ SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
 CAMERA_PAN_SPEED = 0.30
 
-PLAYER_HEALTH = 10
+PLAYER_HEALTH = 1
 PLAYER_ATTACK_DAMAGE = 1
 MUSHROOM_ENEMY_HEALTH = 3
 MUSHROOM_ENEMY_DAMAGE = 1
@@ -198,8 +198,10 @@ class EnemyCharacter(arcade.Sprite):
 
 class PlayerCharacter(arcade.Sprite):
     def __init__(self, max_health, idle_textures, run_textures, jump_textures, fall_textures,
-                 attack_textures, shield_textures, takedamage_textures, death_textures, enemy_list):
+                 attack_textures, shield_textures, takedamage_textures, death_textures, enemy_list, game_view):
         super().__init__(idle_textures[0][0], scale=PLAYER_SCALING)
+
+        self.game_view = game_view
 
         self.character_face_direction = RIGHT_FACING
         self.cur_texture = 0
@@ -247,6 +249,7 @@ class PlayerCharacter(arcade.Sprite):
             self.is_dead = True
             self.death_frame = 0
 
+
     def heal(self, amount):
         self.current_health = min(self.current_health + amount, self.max_health)
 
@@ -279,6 +282,7 @@ class PlayerCharacter(arcade.Sprite):
             self.cur_texture = 0
 
     def update_animation(self, delta_time: float = 1 / 60):
+
         if self.change_x < 0:
             self.character_face_direction = LEFT_FACING
         elif self.change_x > 0:
@@ -289,15 +293,11 @@ class PlayerCharacter(arcade.Sprite):
 
         if self.is_dead:
             self.death_frame += 1
-            if self.death_frame >= len(self.death_textures) * UPDATES_PER_FRAME:
-                self.death_frame = 0
-                self.is_dead = False
-                self.current_health = self.max_health
-                self.center_x = 196
-                self.center_y = 270
-            else:
-                frame = self.death_frame // UPDATES_PER_FRAME
+            frame = self.death_frame // UPDATES_PER_FRAME
+            if frame < len(self.death_textures):
                 self.texture = self.death_textures[frame][self.character_face_direction]
+                self.change_x = 0  # Stop movement
+                self.change_y = 0
             return
 
         if self.is_taking_damage:
@@ -369,9 +369,93 @@ class PlayerCharacter(arcade.Sprite):
             frame = self.cur_texture // IDLE_UPDATES_PER_FRAME
             self.texture = self.idle_textures[frame][self.character_face_direction]
 
+
+class StartScreen(arcade.View):
+    def __init__(self):
+        super().__init__()
+        # Track button animation state
+        self.button_pulse = 0
+        self.button_pulse_dir = 1
+        self.title_y = WINDOW_HEIGHT + 100  # Start offscreen for animation
+
+    def on_show(self):
+        """Run when the view is shown"""
+        arcade.set_background_color(arcade.color.BLACK)
+
+    def on_draw(self):
+        """Draw the start screen"""
+        self.clear()
+        
+        # Draw game title
+        title = "Adventurer's Impact"
+        arcade.draw_text(
+            title,
+            WINDOW_WIDTH//2, self.title_y,
+            arcade.color.WHITE, 54,
+            anchor_x="center", font_name="Kenney Future"
+        )
+        
+        # Draw instructions
+        arcade.draw_text(
+            "Press any key to start",
+            WINDOW_WIDTH//2, WINDOW_HEIGHT//2,
+            arcade.color.WHITE, 24,
+            anchor_x="center"
+        )
+        
+        arcade.draw_text(
+            "Arrow Keys/WASD to Move | SPACE to Attack |",
+            WINDOW_WIDTH//2, WINDOW_HEIGHT//2 - 50,
+            arcade.color.LIGHT_GRAY, 18,
+            anchor_x="center"
+        )
+
+    def on_update(self, delta_time):
+        """Animate title sliding down"""
+        if self.title_y > WINDOW_HEIGHT * 0.7:
+            self.title_y -= delta_time * 200
+
+    def on_key_press(self, key, _modifiers):
+        """Start game on ANY key press"""
+        self.start_game()
+
+    def start_game(self):
+        """Transition to game view"""
+        game_view = GameView()
+        game_view.setup()
+        self.window.show_view(game_view)
+
+class DeathScreen(arcade.View):
+    def __init__(self, game_view):
+        super().__init__()
+        self.game_view = game_view  # Store reference to the game
+    
+    def on_draw(self):
+        self.clear()
+        arcade.draw_text(
+            "GAME OVER",
+            WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + 50,
+            arcade.color.RED, 72,
+            anchor_x="center"
+        )
+        arcade.draw_text(
+            "Press any key to restart",
+            WINDOW_WIDTH//2, WINDOW_HEIGHT//2 - 50,
+            arcade.color.WHITE, 36,
+            anchor_x="center"
+        )
+    
+    def on_key_press(self, key, _modifiers):
+        new_game = GameView()
+        new_game.setup()
+        self.window.show_view(new_game)
+
+
 class GameView(arcade.View):
     def __init__(self):
         super().__init__()
+
+        self.window.current_game_view = self
         
         # Game objects
         self.tile_map = None
@@ -386,6 +470,7 @@ class GameView(arcade.View):
         # Game state
         self.end_of_map = 0
         self.game_over = False
+        
         self.score = 0
         
         # Camera
@@ -495,7 +580,8 @@ class GameView(arcade.View):
             self.shield_textures,
             self.takedamage_textures,
             self.death_textures,
-            self.enemy_list
+            self.enemy_list,
+            self
         )
         self.player_sprite.center_x = 196
         self.player_sprite.center_y = 270
@@ -590,25 +676,6 @@ class GameView(arcade.View):
         self.camera.use()
         self.clear()
 
-     #   self.backgrounds.offset = self.camera.bottom_left
-      #  self.backgrounds.pos = self.camera.bottom_left
-
-       # with self.window.ctx.enabled(self.window.ctx.BLEND):
-        #    self.backgrounds.draw()
-
-
-       # for layer_name in ["Background", "Midground", "Foreground"]:
-       #     factor = self.parallax_layers[layer_name]
-        
-            # Apply parallax transform
-        #    with arcade.get_window().ctx.push():
-         #       arcade.set_viewport(
-         #           self.camera.position[0] * factor - self.window.width/2,
-          #          self.camera.position[0] * factor + self.window.width/2,
-           #         self.camera.position[1] * factor - self.window.height/2,
-            #        self.camera.position[1] * factor + self.window.height/2
-              #  )
-             #   self.scene[layer_name].draw()
 
         self.scene["Background_Filler"].draw()
         self.scene["Background"].draw()
@@ -685,22 +752,30 @@ class GameView(arcade.View):
             self.player_sprite.change_x = 0
 
     def on_update(self, delta_time):
-        if self.player_sprite.right >= self.end_of_map:
-            self.game_over = True
 
+        if self.player_sprite.is_dead:
+            if self.player_sprite.death_frame > len(self.player_sprite.death_textures) * UPDATES_PER_FRAME:
+                death_screen = DeathScreen(self)
+                self.window.show_view(death_screen)
+                return
+            
         if not self.game_over:
             self.physics_engine.update()
             self.player_sprite.update_animation(delta_time)
 
-        coins_hit = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
-        for coin in coins_hit:
-            coin.remove_from_sprite_lists()
-            self.score += 1
+            if self.player_sprite.right >= self.end_of_map:
+                self.game_over = True
 
-        for enemy in self.enemy_list:
-            enemy.update()
-            enemy.detect_player(self.player_sprite) 
-            enemy.update_animation(delta_time)
+
+            coins_hit = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
+            for coin in coins_hit:
+                coin.remove_from_sprite_lists()
+                self.score += 1
+
+            for enemy in self.enemy_list:
+                enemy.update()
+                enemy.detect_player(self.player_sprite) 
+                enemy.update_animation(delta_time)
 
         self.pan_camera_to_user(CAMERA_PAN_SPEED)
 
@@ -718,10 +793,13 @@ class GameView(arcade.View):
 
 def main():
     window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
-    game = GameView()
-    game.setup()
-    window.show_view(game)
-    window.run()
+    start_view = StartScreen()
+    window.show_view(start_view)
+    arcade.run()
+  #  game = GameView()
+   # game.setup()
+    #window.show_view(game)
+    #window.run()
 
 if __name__ == "__main__":
     main()
