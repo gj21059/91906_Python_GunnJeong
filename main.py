@@ -1,5 +1,6 @@
 import time
 import arcade
+import arcade.future.background as background
 import os
 
 
@@ -504,6 +505,8 @@ class GameView(arcade.View):
         file_path = os.path.dirname(os.path.abspath(__file__))
         map_path = os.path.join(file_path, "resources/maps/testmap.tmx")
 
+
+
         layer_options = {
             "Mushroom_Enemies": {"use_spatial_hash": True},
             "floor": {"use_spatial_hash": True},
@@ -520,14 +523,21 @@ class GameView(arcade.View):
 
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
         self.wall_list = self.tile_map.sprite_lists["floor"]
-        self.decorations = self.tile_map.sprite_lists["Decorations"]
+        self.decorations = self.scene["Decorations"]
         self.background_filler = self.scene["Background_Filler"]
         self.background = self.scene["Background"]
         self.midground = self.scene["Midground"]
         self.foreground = self.scene["Foreground"]
 
+        self.parallax_layers = {
+            "Background": 0.2,
+            "Midground": 0.4,
+            "Foreground": 0.6
+        }
+
         if self.tile_map.background_color:
             self.window.background_color = self.tile_map.background_color
+
 
         # Physics
         self.physics_engine = arcade.PhysicsEnginePlatformer(
@@ -579,6 +589,26 @@ class GameView(arcade.View):
     def on_draw(self):
         self.camera.use()
         self.clear()
+
+     #   self.backgrounds.offset = self.camera.bottom_left
+      #  self.backgrounds.pos = self.camera.bottom_left
+
+       # with self.window.ctx.enabled(self.window.ctx.BLEND):
+        #    self.backgrounds.draw()
+
+
+       # for layer_name in ["Background", "Midground", "Foreground"]:
+       #     factor = self.parallax_layers[layer_name]
+        
+            # Apply parallax transform
+        #    with arcade.get_window().ctx.push():
+         #       arcade.set_viewport(
+         #           self.camera.position[0] * factor - self.window.width/2,
+          #          self.camera.position[0] * factor + self.window.width/2,
+           #         self.camera.position[1] * factor - self.window.height/2,
+            #        self.camera.position[1] * factor + self.window.height/2
+              #  )
+             #   self.scene[layer_name].draw()
 
         self.scene["Background_Filler"].draw()
         self.scene["Background"].draw()
