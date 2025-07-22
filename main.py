@@ -2,6 +2,12 @@ import time
 import arcade
 import os
 
+
+# Things to do: Add a timer, add death/intro/start screen, add a score system, find an asset for going to new levels
+
+
+
+
 # Constants
 TILE_SCALING = 2.5
 PLAYER_SCALING = 2.2
