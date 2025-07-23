@@ -21,7 +21,7 @@ SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
 CAMERA_PAN_SPEED = 0.30
 
-PLAYER_HEALTH = 1
+PLAYER_HEALTH = 5
 PLAYER_ATTACK_DAMAGE = 1
 MUSHROOM_ENEMY_HEALTH = 3
 MUSHROOM_ENEMY_DAMAGE = 1
@@ -171,7 +171,7 @@ class EnemyCharacter(arcade.Sprite):
                     self.change_x = 0
                     self.cur_texture = 0 
             else:
-                chase_speed = 4
+                chase_speed = 2
                 self.change_x = -chase_speed if raw_x < 0 else chase_speed
         else:
             if self.direction == RIGHT_FACING:
@@ -595,6 +595,7 @@ class GameView(arcade.View):
 
         layer_options = {
             "Mushroom_Enemies": {"use_spatial_hash": True},
+            "Finish": {"use_spatial_hash": True},
             "Spikes": {"use_spatial_hash": True},
             "floor": {"use_spatial_hash": True},
             "Decorations": {"use_spatial_hash": False},
@@ -610,6 +611,7 @@ class GameView(arcade.View):
 
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
         self.wall_list = self.tile_map.sprite_lists["floor"]
+        self.finish_list = self.tile_map.sprite_lists["Finish"]
         self.spikes_list = self.tile_map.sprite_lists["Spikes"]
         self.decorations = self.scene["Decorations"]
         self.background_filler = self.scene["Background_Filler"]
@@ -689,6 +691,7 @@ class GameView(arcade.View):
 
         
         self.wall_list.draw()
+        self.finish_list.draw()
         self.spikes_list.draw()
         self.coin_list.draw()
         self.enemy_list.draw()
