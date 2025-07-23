@@ -595,6 +595,7 @@ class GameView(arcade.View):
 
         layer_options = {
             "Mushroom_Enemies": {"use_spatial_hash": True},
+            "Spikes": {"use_spatial_hash": True},
             "floor": {"use_spatial_hash": True},
             "Decorations": {"use_spatial_hash": False},
             "Background_Filler": {"use_spatial_hash": False},
@@ -609,6 +610,7 @@ class GameView(arcade.View):
 
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
         self.wall_list = self.tile_map.sprite_lists["floor"]
+        self.spikes_list = self.tile_map.sprite_lists["Spikes"]
         self.decorations = self.scene["Decorations"]
         self.background_filler = self.scene["Background_Filler"]
         self.background = self.scene["Background"]
@@ -685,10 +687,12 @@ class GameView(arcade.View):
 
         self.frame_count += 1
 
-        self.player_list.draw()
+        
         self.wall_list.draw()
+        self.spikes_list.draw()
         self.coin_list.draw()
         self.enemy_list.draw()
+        self.player_list.draw()
 
         for sprite in self.player_list:
             sprite.draw_health_bar()
@@ -710,6 +714,8 @@ class GameView(arcade.View):
                 enemy.right_boundary, enemy.center_y,
                 arcade.color.BLUE, 1
             )
+
+        
 
         self.gui_camera.use()
 
@@ -758,6 +764,8 @@ class GameView(arcade.View):
                 death_screen = DeathScreen(self)
                 self.window.show_view(death_screen)
                 return
+        
+
             
         if not self.game_over:
             self.physics_engine.update()
@@ -766,6 +774,9 @@ class GameView(arcade.View):
             if self.player_sprite.right >= self.end_of_map:
                 self.game_over = True
 
+            if arcade.check_for_collision_with_list(self.player_sprite, self.spikes_list):
+                self.player_sprite.current_health = 0
+                self.player_sprite.is_dead = True
 
             coins_hit = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
             for coin in coins_hit:
