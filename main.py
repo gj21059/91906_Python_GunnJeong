@@ -296,7 +296,7 @@ class PlayerCharacter(arcade.Sprite):
             frame = self.death_frame // UPDATES_PER_FRAME
             if frame < len(self.death_textures):
                 self.texture = self.death_textures[frame][self.character_face_direction]
-                self.change_x = 0  # Stop movement
+                self.change_x = 0  
                 self.change_y = 0
             return
 
@@ -305,6 +305,7 @@ class PlayerCharacter(arcade.Sprite):
                 frame = self.takedamage_frame // UPDATES_PER_FRAME
                 self.texture = self.takedamage_textures[frame][self.character_face_direction]
                 self.takedamage_frame += 1
+                self.change_x = 0  
             else:
                 self.is_taking_damage = False
             return
@@ -598,6 +599,7 @@ class GameView(arcade.View):
             "Finish": {"use_spatial_hash": True},
             "Spikes": {"use_spatial_hash": True},
             "floor": {"use_spatial_hash": True},
+            "Boundaries": {"use_spatial_hash": True},
             "Decorations": {"use_spatial_hash": False},
             "Background_Filler": {"use_spatial_hash": False},
             "Background": {"use_spatial_hash": False},
@@ -610,6 +612,7 @@ class GameView(arcade.View):
         self.load_enemies_from_map()
 
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
+        self.boundaries_list = self.tile_map.sprite_lists["Boundaries"]
         self.wall_list = self.tile_map.sprite_lists["floor"]
         self.finish_list = self.tile_map.sprite_lists["Finish"]
         self.spikes_list = self.tile_map.sprite_lists["Spikes"]
@@ -681,10 +684,11 @@ class GameView(arcade.View):
         self.clear()
 
 
-        self.scene["Background_Filler"].draw()
+        
         self.scene["Background"].draw()
         self.scene["Midground"].draw()
         self.scene["Foreground"].draw()
+        self.scene["Background_Filler"].draw()
         self.scene["Decorations"].draw()
 
         self.frame_count += 1
@@ -735,9 +739,6 @@ class GameView(arcade.View):
         self.distance_text.text = f"Distance: {distance}"
         self.distance_text.draw()
 
-        if self.game_over:
-            arcade.draw_text("Game Over", 200, 200, arcade.color.BLACK, 30)
-
     def on_key_press(self, key, modifiers):
         if key == arcade.key.UP or key == arcade.key.W:
             if self.physics_engine.can_jump():
@@ -781,6 +782,10 @@ class GameView(arcade.View):
                 self.player_sprite.current_health = 0
                 self.player_sprite.is_dead = True
 
+            if arcade.check_for_collision_with_list(self.player_sprite, self.boundaries_list):
+                self.player_sprite.current_health = 0
+                self.player_sprite.is_dead = True
+                
             coins_hit = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
             for coin in coins_hit:
                 coin.remove_from_sprite_lists()
@@ -810,10 +815,7 @@ def main():
     start_view = StartScreen()
     window.show_view(start_view)
     arcade.run()
-  #  game = GameView()
-   # game.setup()
-    #window.show_view(game)
-    #window.run()
+
 
 if __name__ == "__main__":
     main()
