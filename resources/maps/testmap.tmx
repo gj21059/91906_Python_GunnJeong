@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="24" tileheight="24" infinite="0" backgroundcolor="#453d4f" nextlayerid="17" nextobjectid="268">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="24" tileheight="24" infinite="0" backgroundcolor="#453d4f" nextlayerid="17" nextobjectid="268">
  <tileset firstgid="1" source="../oak_woods_tileset.tsx"/>
  <tileset firstgid="316" name="Backgrounds" tilewidth="708" tileheight="180" tilecount="15" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
@@ -13,46 +13,46 @@
    <image source="background/background_layer_3.png" width="320" height="180"/>
   </tile>
   <tile id="3">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/fence_1.png" width="73" height="19"/>
+   <image source="../oak_woods_v1.0/decorations/fence_1.png" width="73" height="19"/>
   </tile>
   <tile id="4">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/fence_2.png" width="72" height="19"/>
+   <image source="../oak_woods_v1.0/decorations/fence_2.png" width="72" height="19"/>
   </tile>
   <tile id="5">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/grass_1.png" width="8" height="3"/>
+   <image source="../oak_woods_v1.0/decorations/grass_1.png" width="8" height="3"/>
   </tile>
   <tile id="6">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/grass_2.png" width="10" height="5"/>
+   <image source="../oak_woods_v1.0/decorations/grass_2.png" width="10" height="5"/>
   </tile>
   <tile id="7">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/grass_3.png" width="9" height="4"/>
+   <image source="../oak_woods_v1.0/decorations/grass_3.png" width="9" height="4"/>
   </tile>
   <tile id="8">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/lamp.png" width="23" height="57"/>
+   <image source="../oak_woods_v1.0/decorations/lamp.png" width="23" height="57"/>
   </tile>
   <tile id="9">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/rock_1.png" width="20" height="11"/>
+   <image source="../oak_woods_v1.0/decorations/rock_1.png" width="20" height="11"/>
   </tile>
   <tile id="10">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/rock_2.png" width="27" height="12"/>
+   <image source="../oak_woods_v1.0/decorations/rock_2.png" width="27" height="12"/>
   </tile>
   <tile id="11">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/rock_3.png" width="45" height="18"/>
+   <image source="../oak_woods_v1.0/decorations/rock_3.png" width="45" height="18"/>
   </tile>
   <tile id="12">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/shop.png" width="118" height="98"/>
+   <image source="../oak_woods_v1.0/decorations/shop.png" width="118" height="98"/>
   </tile>
   <tile id="13">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/shop_anim.png" width="708" height="128"/>
+   <image source="../oak_woods_v1.0/decorations/shop_anim.png" width="708" height="128"/>
   </tile>
   <tile id="14">
-   <image source="../../../Python Internal/oak_woods_v1.0/oak_woods_v1.0/decorations/sign.png" width="22" height="31"/>
+   <image source="../oak_woods_v1.0/decorations/sign.png" width="22" height="31"/>
   </tile>
  </tileset>
- <tileset firstgid="331" name="spikes" tilewidth="16" tileheight="16" tilecount="4" columns="4">
+ <tileset firstgid="343" name="spikes" tilewidth="16" tileheight="16" tilecount="4" columns="4">
   <image source="../oak_woods_v1.0/spikes/16-bit-spike-Sheet.png" width="64" height="16"/>
  </tileset>
- <tileset firstgid="335" name="DoorFinish" tilewidth="41" tileheight="59" tilecount="1" columns="0">
+ <tileset firstgid="347" name="DoorFinish" tilewidth="41" tileheight="59" tilecount="1" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
    <image source="../oak_woods_v1.0/doorfinish/door.png" width="41" height="59"/>
@@ -66,16 +66,12 @@
  </objectgroup>
  <objectgroup id="7" name="Midground">
   <object id="30" gid="317" x="0" y="408" width="624" height="408"/>
-  <object id="233" gid="321" x="2184" y="168" width="8" height="3"/>
-  <object id="234" gid="321" x="2232" y="240" width="8" height="3"/>
   <object id="259" gid="317" x="624" y="408" width="624" height="408"/>
   <object id="260" gid="317" x="1248" y="408" width="624" height="408"/>
   <object id="261" gid="317" x="1872" y="408" width="624" height="408"/>
  </objectgroup>
  <objectgroup id="8" name="Foreground">
   <object id="33" gid="318" x="0" y="408" width="624" height="408"/>
-  <object id="217" gid="321" x="312" y="168" width="8" height="3"/>
-  <object id="218" gid="321" x="360" y="240" width="8" height="3"/>
   <object id="256" gid="318" x="624" y="408" width="624" height="408"/>
   <object id="257" gid="318" x="1248" y="408" width="624" height="408"/>
   <object id="258" gid="318" x="1872" y="408" width="624" height="408"/>
@@ -148,48 +144,11 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,331,331,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,331,331,331,0,0,0,0,0,0,0,331,331,331,331,331,331,331,331,331,331,331,331,331,331,331,331,331,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,343,343,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,343,343,343,0,0,0,0,0,0,0,343,343,343,343,343,343,343,343,343,343,343,343,343,343,343,343,343,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="12" name="Decorations">
-  <object id="161" gid="324" x="600" y="432" width="23" height="57"/>
-  <object id="162" gid="324" x="696" y="432" width="23" height="57"/>
-  <object id="163" gid="319" x="624" y="432" width="73" height="19"/>
-  <object id="164" gid="330" x="744" y="408" width="22" height="31"/>
-  <object id="165" gid="323" x="720" y="432" width="9" height="4"/>
-  <object id="167" gid="327" x="552" y="432" width="45" height="18"/>
-  <object id="168" gid="322" x="576" y="432" width="10" height="5"/>
-  <object id="169" gid="325" x="768" y="408" width="20" height="11"/>
-  <object id="170" gid="326" x="888" y="360" width="27" height="12"/>
-  <object id="171" gid="328" x="264" y="408" width="118" height="98"/>
-  <object id="172" gid="322" x="24" y="408" width="10" height="5"/>
-  <object id="173" gid="322" x="48" y="408" width="10" height="5"/>
-  <object id="174" gid="322" x="144" y="408" width="10" height="5"/>
-  <object id="175" gid="326" x="120" y="408" width="27" height="12"/>
-  <object id="176" gid="321" x="456" y="432" width="8" height="3"/>
-  <object id="177" gid="321" x="432" y="432" width="8" height="3"/>
-  <object id="178" gid="325" x="408" y="432" width="20" height="11"/>
-  <object id="179" gid="324" x="216" y="408" width="23" height="57"/>
-  <object id="180" gid="321" x="192" y="408" width="8" height="3"/>
-  <object id="181" gid="321" x="96" y="408" width="8" height="3"/>
-  <object id="183" gid="321" x="1080" y="360" width="8" height="3"/>
-  <object id="184" gid="321" x="1152" y="360" width="8" height="3"/>
-  <object id="185" gid="321" x="1176" y="360" width="8" height="3"/>
-  <object id="187" gid="327" x="1128" y="360" width="45" height="18"/>
-  <object id="188" gid="321" x="1152" y="360" width="8" height="3"/>
-  <object id="210" gid="323" x="1464" y="264" width="9" height="4"/>
-  <object id="211" gid="325" x="1392" y="264" width="20" height="11"/>
-  <object id="212" gid="330" x="1296" y="312" width="22" height="31"/>
-  <object id="213" gid="321" x="1656" y="360" width="8" height="3"/>
-  <object id="214" gid="321" x="1680" y="360" width="8" height="3"/>
-  <object id="215" gid="327" x="1632" y="360" width="45" height="18"/>
-  <object id="216" gid="321" x="1656" y="360" width="8" height="3"/>
-  <object id="248" gid="319" x="1680" y="360" width="73" height="19"/>
-  <object id="249" gid="319" x="1752" y="360" width="73" height="19"/>
-  <object id="250" gid="319" x="1824" y="360" width="73" height="19"/>
-  <object id="251" gid="319" x="1872" y="360" width="73" height="19"/>
- </objectgroup>
+ <objectgroup id="12" name="Decorations"/>
  <objectgroup id="10" name="Mushroom_Enemies">
   <object id="182" x="936" y="360">
    <point/>
@@ -205,7 +164,7 @@
   </object>
  </objectgroup>
  <objectgroup id="14" name="Finish">
-  <object id="243" gid="335" x="1848" y="360" width="41" height="59"/>
+  <object id="243" gid="347" x="1848" y="360" width="41" height="59"/>
  </objectgroup>
  <layer id="16" name="Boundaries" width="100" height="20">
   <data encoding="csv">
