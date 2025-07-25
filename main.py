@@ -598,7 +598,7 @@ class GameView(arcade.View):
             "Mushroom_Enemies": {"use_spatial_hash": True},
             "Finish": {"use_spatial_hash": True},
             "Spikes": {"use_spatial_hash": True},
-            "floor": {"use_spatial_hash": True},
+            "Ground": {"use_spatial_hash": True},
             "Boundaries": {"use_spatial_hash": True},
             "Decorations": {"use_spatial_hash": False},
             "Background_Filler": {"use_spatial_hash": False},
@@ -613,7 +613,7 @@ class GameView(arcade.View):
 
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
         self.boundaries_list = self.tile_map.sprite_lists["Boundaries"]
-        self.wall_list = self.tile_map.sprite_lists["floor"]
+        self.wall_list = self.tile_map.sprite_lists["Ground"]
         self.finish_list = self.tile_map.sprite_lists["Finish"]
         self.spikes_list = self.tile_map.sprite_lists["Spikes"]
         self.decorations = self.scene["Decorations"]
