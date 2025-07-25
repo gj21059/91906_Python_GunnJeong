@@ -58,6 +58,12 @@
    <image source="../map_resources/doorfinish/door.png" width="41" height="59"/>
   </tile>
  </tileset>
+ <tileset firstgid="336" name="test" tilewidth="118" tileheight="98" tilecount="1" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image source="../map_resources/decorations/shop.png" width="118" height="98"/>
+  </tile>
+ </tileset>
  <objectgroup id="6" name="Background">
   <object id="26" gid="316" x="0" y="408" width="624" height="408"/>
   <object id="262" gid="316" x="600" y="408" width="624" height="408"/>
