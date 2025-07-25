@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="24" tileheight="24" infinite="0" backgroundcolor="#453d4f" nextlayerid="17" nextobjectid="268">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="24" tileheight="24" infinite="0" backgroundcolor="#453d4f" nextlayerid="17" nextobjectid="268">
  <tileset firstgid="1" source="../oak_woods_tileset.tsx"/>
  <tileset firstgid="316" name="Backgrounds" tilewidth="708" tileheight="180" tilecount="15" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
@@ -13,49 +13,49 @@
    <image source="background/background_layer_3.png" width="320" height="180"/>
   </tile>
   <tile id="3">
-   <image source="../oak_woods_v1.0/decorations/fence_1.png" width="73" height="19"/>
+   <image source="../map_resources/decorations/fence_1.png" width="73" height="19"/>
   </tile>
   <tile id="4">
-   <image source="../oak_woods_v1.0/decorations/fence_2.png" width="72" height="19"/>
+   <image source="../map_resources/decorations/fence_2.png" width="72" height="19"/>
   </tile>
   <tile id="5">
-   <image source="../oak_woods_v1.0/decorations/grass_1.png" width="8" height="3"/>
+   <image source="../map_resources/decorations/grass_1.png" width="8" height="3"/>
   </tile>
   <tile id="6">
-   <image source="../oak_woods_v1.0/decorations/grass_2.png" width="10" height="5"/>
+   <image source="../map_resources/decorations/grass_2.png" width="10" height="5"/>
   </tile>
   <tile id="7">
-   <image source="../oak_woods_v1.0/decorations/grass_3.png" width="9" height="4"/>
+   <image source="../map_resources/decorations/grass_3.png" width="9" height="4"/>
   </tile>
   <tile id="8">
-   <image source="../oak_woods_v1.0/decorations/lamp.png" width="23" height="57"/>
+   <image source="../map_resources/decorations/lamp.png" width="23" height="57"/>
   </tile>
   <tile id="9">
-   <image source="../oak_woods_v1.0/decorations/rock_1.png" width="20" height="11"/>
+   <image source="../map_resources/decorations/rock_1.png" width="20" height="11"/>
   </tile>
   <tile id="10">
-   <image source="../oak_woods_v1.0/decorations/rock_2.png" width="27" height="12"/>
+   <image source="../map_resources/decorations/rock_2.png" width="27" height="12"/>
   </tile>
   <tile id="11">
-   <image source="../oak_woods_v1.0/decorations/rock_3.png" width="45" height="18"/>
+   <image source="../map_resources/decorations/rock_3.png" width="45" height="18"/>
   </tile>
   <tile id="12">
-   <image source="../oak_woods_v1.0/decorations/shop.png" width="118" height="98"/>
+   <image source="../map_resources/decorations/shop.png" width="118" height="98"/>
   </tile>
   <tile id="13">
-   <image source="../oak_woods_v1.0/decorations/shop_anim.png" width="708" height="128"/>
+   <image source="../map_resources/decorations/shop_anim.png" width="708" height="128"/>
   </tile>
   <tile id="14">
-   <image source="../oak_woods_v1.0/decorations/sign.png" width="22" height="31"/>
+   <image source="../map_resources/decorations/sign.png" width="22" height="31"/>
   </tile>
  </tileset>
- <tileset firstgid="343" name="spikes" tilewidth="16" tileheight="16" tilecount="4" columns="4">
-  <image source="../oak_woods_v1.0/spikes/16-bit-spike-Sheet.png" width="64" height="16"/>
+ <tileset firstgid="331" name="spikes" tilewidth="16" tileheight="16" tilecount="4" columns="4">
+  <image source="../map_resources/spikes/16-bit-spike-Sheet.png" width="64" height="16"/>
  </tileset>
- <tileset firstgid="347" name="DoorFinish" tilewidth="41" tileheight="59" tilecount="1" columns="0">
+ <tileset firstgid="335" name="Finish" tilewidth="41" tileheight="59" tilecount="1" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
-   <image source="../oak_woods_v1.0/doorfinish/door.png" width="41" height="59"/>
+   <image source="../map_resources/doorfinish/door.png" width="41" height="59"/>
   </tile>
  </tileset>
  <objectgroup id="6" name="Background">
@@ -144,7 +144,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,343,343,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,343,343,343,0,0,0,0,0,0,0,343,343,343,343,343,343,343,343,343,343,343,343,343,343,343,343,343,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,331,331,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,331,331,331,0,0,0,0,0,0,0,331,331,331,331,331,331,331,331,331,331,331,331,331,331,331,331,331,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
@@ -163,9 +163,7 @@
    <point/>
   </object>
  </objectgroup>
- <objectgroup id="14" name="Finish">
-  <object id="243" gid="347" x="1848" y="360" width="41" height="59"/>
- </objectgroup>
+ <objectgroup id="14" name="Finish"/>
  <layer id="16" name="Boundaries" width="100" height="20">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

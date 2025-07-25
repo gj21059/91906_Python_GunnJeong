@@ -590,7 +590,7 @@ class GameView(arcade.View):
 
         # Load map
         file_path = os.path.dirname(os.path.abspath(__file__))
-        map_path = os.path.join(file_path, "resources/maps/testmap.tmx")
+        map_path = os.path.join(file_path, "resources/maps/level1.tmx")
 
 
 
