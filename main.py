@@ -463,13 +463,13 @@ class GameView(arcade.View):
         self.scene = None
         self.player_list = None
         self.enemy_list = None
-        self.coin_list = None
         self.wall_list = None
         self.player_sprite = None
         self.physics_engine = None
         
         # Game state
         self.end_of_map = 0
+        self.level = 3
         self.game_over = False
         
         self.score = 0
@@ -505,6 +505,7 @@ class GameView(arcade.View):
         self.player_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
+        
 
         # Load textures
         character_path = "resources/sprites/blue_player"
@@ -585,12 +586,12 @@ class GameView(arcade.View):
             self
         )
         self.player_sprite.center_x = 196
-        self.player_sprite.center_y = 270
+        self.player_sprite.center_y = 4800
         self.player_list.append(self.player_sprite)
 
         # Load map
         file_path = os.path.dirname(os.path.abspath(__file__))
-        map_path = os.path.join(file_path, "resources/maps/level1.tmx")
+        map_path = os.path.join(file_path, f"resources/maps/level{self.level}.tmx")
 
 
 
@@ -605,6 +606,7 @@ class GameView(arcade.View):
             "Background": {"use_spatial_hash": False},
             "Midground": {"use_spatial_hash": False},
             "Foreground": {"use_spatial_hash": False},
+            "Moving_Platforms": {"use_spatial_hash": True},
         }
 
         self.tile_map = arcade.load_tilemap(map_path, TILE_SCALING, layer_options)
@@ -622,19 +624,40 @@ class GameView(arcade.View):
         self.midground = self.scene["Midground"]
         self.foreground = self.scene["Foreground"]
 
-        self.parallax_layers = {
-            "Background": 0.2,
-            "Midground": 0.4,
-            "Foreground": 0.6
-        }
+        self.moving_platforms = arcade.SpriteList()
+        if "Moving_Platforms" in self.tile_map.sprite_lists:
+            for platform in self.tile_map.sprite_lists["Moving_Platforms"]:
+                # Set movement properties from Tiled properties
+                platform.boundary_left = platform.properties.get("boundary_left", platform.center_x - 100)
+                platform.boundary_right = platform.properties.get("boundary_right", platform.center_x + 100)
+                platform.boundary_top = platform.properties.get("boundary_top", platform.center_y + 100)
+                platform.boundary_bottom = platform.properties.get("boundary_bottom", platform.center_y - 100)
+                platform.change_x = platform.properties.get("change_x", 0)
+                platform.change_y = platform.properties.get("change_y", 0)
+                
+                # Add to sprite list
+                self.moving_platforms.append(platform)
+        
+        # Create physics engine with ALL platforms
+        self.physics_engine = arcade.PhysicsEnginePlatformer(
+            self.player_sprite, 
+            [self.wall_list, self.moving_platforms],  # Combine static and moving platforms
+            gravity_constant=GRAVITY
+        )
+
 
         if self.tile_map.background_color:
             self.window.background_color = self.tile_map.background_color
 
+        platforms = [self.wall_list]
+        if self.moving_platforms:
+            platforms.append(self.moving_platforms)
 
-        # Physics
+        # Create physics engine with ALL platforms
         self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.player_sprite, [self.wall_list], gravity_constant=GRAVITY
+            self.player_sprite, 
+            platforms,  # Now includes both static and moving platforms
+            gravity_constant=GRAVITY
         )
         
         # Camera
@@ -646,7 +669,7 @@ class GameView(arcade.View):
         self.camera_bounds = arcade.LRBT(
             self.window.width / 2.0,
             max_x - self.window.width / 2.0,
-            self.window.height / 2.0,
+            0,
             max_y,
         )
 
@@ -695,6 +718,7 @@ class GameView(arcade.View):
 
         
         self.wall_list.draw()
+        self.moving_platforms.draw()
         self.finish_list.draw()
         self.spikes_list.draw()
         self.coin_list.draw()
@@ -772,11 +796,25 @@ class GameView(arcade.View):
 
             
         if not self.game_over:
+            if not self.game_over:
+        # Move platforms FIRST
+                for platform in self.moving_platforms:
+                    platform.center_x += platform.change_x
+                    if platform.change_x > 0 and platform.center_x > platform.boundary_right:
+                        platform.change_x *= -1
+                    elif platform.change_x < 0 and platform.center_x < platform.boundary_left:
+                        platform.change_x *= -1
+        
+        # Then update physics
             self.physics_engine.update()
             self.player_sprite.update_animation(delta_time)
 
             if self.player_sprite.right >= self.end_of_map:
                 self.game_over = True
+            
+            if arcade.check_for_collision_with_list(self.player_sprite, self.finish_list):
+                self.level += 1
+                self.setup()
 
             if arcade.check_for_collision_with_list(self.player_sprite, self.spikes_list):
                 self.player_sprite.current_health = 0
@@ -785,6 +823,8 @@ class GameView(arcade.View):
             if arcade.check_for_collision_with_list(self.player_sprite, self.boundaries_list):
                 self.player_sprite.current_health = 0
                 self.player_sprite.is_dead = True
+            
+
                 
             coins_hit = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
             for coin in coins_hit:
