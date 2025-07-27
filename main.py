@@ -198,7 +198,7 @@ class EnemyCharacter(arcade.Sprite):
 
 class PlayerCharacter(arcade.Sprite):
     def __init__(self, max_health, idle_textures, run_textures, jump_textures, fall_textures,
-                 attack_textures, shield_textures, takedamage_textures, death_textures, enemy_list, game_view):
+                 attack_textures, takedamage_textures, death_textures, enemy_list, game_view):
         super().__init__(idle_textures[0][0], scale=PLAYER_SCALING)
 
         self.game_view = game_view
@@ -207,13 +207,11 @@ class PlayerCharacter(arcade.Sprite):
         self.cur_texture = 0
         self.jump_frame = 0
         self.attack_frame = 0
-        self.shield_frame = 0
         self.takedamage_frame = 0
         self.death_frame = 0
         self.invulnerable_timer = 0
 
         self.is_attacking = False
-        self.is_shielding = False
         self.is_taking_damage = False
         self.is_dead = False
         self.has_dealt_damage = False
@@ -223,7 +221,6 @@ class PlayerCharacter(arcade.Sprite):
         self.jump_textures = jump_textures
         self.fall_textures = fall_textures
         self.attack_textures = attack_textures
-        self.shield_textures = shield_textures
         self.takedamage_textures = takedamage_textures
         self.death_textures = death_textures
 
@@ -276,10 +273,6 @@ class PlayerCharacter(arcade.Sprite):
             self.is_attacking = True
             self.cur_texture = 0
 
-    def start_shield(self):
-        if not self.is_shielding:
-            self.is_shielding = True
-            self.cur_texture = 0
 
     def update_animation(self, delta_time: float = 1 / 60):
 
@@ -345,16 +338,6 @@ class PlayerCharacter(arcade.Sprite):
                 self.is_attacking = False
             else:
                 self.texture = self.attack_textures[current_frame][self.character_face_direction]
-            return
-
-        if self.is_shielding:
-            self.shield_frame += 1
-            if self.shield_frame >= len(self.shield_textures) * UPDATES_PER_FRAME:
-                self.shield_frame = 0
-                self.is_shielding = False
-            else:
-                frame = self.shield_frame // UPDATES_PER_FRAME
-                self.texture = self.shield_textures[frame][self.character_face_direction]
             return
 
         if self.change_x != 0:
@@ -491,7 +474,6 @@ class GameView(arcade.View):
         self.fall_textures = []
         self.idle_textures = []
         self.attack_textures = []
-        self.shield_textures = []
         self.takedamage_textures = []
         self.death_textures = []
         self.enemy_walk_textures = []
@@ -535,11 +517,6 @@ class GameView(arcade.View):
         for i in range(6):
             attack_textures = arcade.load_texture(f"{character_path}/player_attack/player_attack{i}.png")
             self.attack_textures.append((attack_textures, attack_textures.flip_left_right()))
-
-        self.shield_textures = []
-        for i in range(3):
-            shield_textures = arcade.load_texture(f"{character_path}/player_shield/player_shield{i}.png")
-            self.shield_textures.append((shield_textures, shield_textures.flip_left_right()))
         
         self.takedamage_textures = []
         for i in range(4):
@@ -579,7 +556,6 @@ class GameView(arcade.View):
             self.jump_textures,
             self.fall_textures,
             self.attack_textures,
-            self.shield_textures,
             self.takedamage_textures,
             self.death_textures,
             self.enemy_list,
@@ -773,13 +749,7 @@ class GameView(arcade.View):
             self.player_sprite.change_x = MOVEMENT_SPEED
         elif key == arcade.key.SPACE:
             self.player_sprite.start_attack()
-        elif key == arcade.key.E:
-            self.player_sprite.start_shield()
-        elif key == arcade.key.T:
-            self.player_sprite.take_damage(1)
-        elif key == arcade.key.Y:
-            self.player_sprite.current_health = 0
-            self.player_sprite.is_dead = True
+
 
     def on_key_release(self, key, modifiers):
         if key in (arcade.key.LEFT, arcade.key.RIGHT, arcade.key.A, arcade.key.D):
@@ -796,15 +766,14 @@ class GameView(arcade.View):
 
             
         if not self.game_over:
-            if not self.game_over:
-        # Move platforms FIRST
-                for platform in self.moving_platforms:
-                    platform.center_x += platform.change_x
-                    if platform.change_x > 0 and platform.center_x > platform.boundary_right:
-                        platform.change_x *= -1
-                    elif platform.change_x < 0 and platform.center_x < platform.boundary_left:
-                        platform.change_x *= -1
-        
+    # Move platforms FIRST
+            for platform in self.moving_platforms:
+                platform.center_x += platform.change_x
+                if platform.change_x > 0 and platform.center_x > platform.boundary_right:
+                    platform.change_x *= -1
+                elif platform.change_x < 0 and platform.center_x < platform.boundary_left:
+                    platform.change_x *= -1
+    
         # Then update physics
             self.physics_engine.update()
             self.player_sprite.update_animation(delta_time)
@@ -823,13 +792,6 @@ class GameView(arcade.View):
             if arcade.check_for_collision_with_list(self.player_sprite, self.boundaries_list):
                 self.player_sprite.current_health = 0
                 self.player_sprite.is_dead = True
-            
-
-                
-            coins_hit = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
-            for coin in coins_hit:
-                coin.remove_from_sprite_lists()
-                self.score += 1
 
             for enemy in self.enemy_list:
                 enemy.update()
