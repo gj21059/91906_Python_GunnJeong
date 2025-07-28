@@ -105,9 +105,6 @@ class EnemyCharacter(arcade.Sprite):
             self.attack_cooldown -= 1
 
     def update_animation(self, delta_time: float = 1/60):
-
-
-
         if self.is_dead:
             frame = min(self.cur_texture // UPDATES_PER_FRAME, len(self.death_textures) - 1)
             self.texture = self.death_textures[frame][self.direction]
@@ -272,9 +269,7 @@ class PlayerCharacter(arcade.Sprite):
             self.is_attacking = True
             self.cur_texture = 0
 
-
     def update_animation(self, delta_time: float = 1 / 60):
-
         if self.change_x < 0:
             self.character_face_direction = LEFT_FACING
         elif self.change_x > 0:
@@ -352,24 +347,19 @@ class PlayerCharacter(arcade.Sprite):
             frame = self.cur_texture // IDLE_UPDATES_PER_FRAME
             self.texture = self.idle_textures[frame][self.character_face_direction]
 
-
 class StartScreen(arcade.View):
     def __init__(self):
         super().__init__()
-        # Track button animation state
         self.button_pulse = 0
         self.button_pulse_dir = 1
-        self.title_y = WINDOW_HEIGHT + 100  # Start offscreen for animation
+        self.title_y = WINDOW_HEIGHT + 100
 
     def on_show(self):
-        """Run when the view is shown"""
         arcade.set_background_color(arcade.color.BLACK)
 
     def on_draw(self):
-        """Draw the start screen"""
         self.clear()
         
-        # Draw game title
         title = "Adventurer's Impact"
         arcade.draw_text(
             title,
@@ -378,7 +368,6 @@ class StartScreen(arcade.View):
             anchor_x="center", font_name="Kenney Future"
         )
         
-        # Draw instructions
         arcade.draw_text(
             "Press any key to start",
             WINDOW_WIDTH//2, WINDOW_HEIGHT//2,
@@ -394,16 +383,13 @@ class StartScreen(arcade.View):
         )
 
     def on_update(self, delta_time):
-        """Animate title sliding down"""
         if self.title_y > WINDOW_HEIGHT * 0.7:
             self.title_y -= delta_time * 200
 
     def on_key_press(self, key, _modifiers):
-        """Start game on ANY key press"""
         self.start_game()
 
     def start_game(self):
-        """Transition to game view"""
         game_view = GameView()
         game_view.setup()
         self.window.show_view(game_view)
@@ -435,7 +421,6 @@ class DeathScreen(arcade.View):
         game_view.setup()
         self.window.show_view(game_view)
 
-
 class GameView(arcade.View):
     def __init__(self):
         super().__init__()
@@ -455,7 +440,6 @@ class GameView(arcade.View):
         self.end_of_map = 0
         self.level = 1  
         self.game_over = False
-        
         self.score = 0
         
         # Camera
@@ -482,6 +466,12 @@ class GameView(arcade.View):
         self.enemy_death_textures = []
         self.enemy_takedamage_textures = []
 
+        # Key states
+        self.left_pressed = False
+        self.right_pressed = False
+        self.up_pressed = False
+        self.space_pressed = False
+
         self.setup()
 
     def setup(self):
@@ -489,6 +479,11 @@ class GameView(arcade.View):
         self.enemy_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
         
+        # Reset key states
+        self.left_pressed = False
+        self.right_pressed = False
+        self.up_pressed = False
+        self.space_pressed = False
 
         # Load textures
         character_path = "resources/sprites/blue_player"
@@ -570,8 +565,6 @@ class GameView(arcade.View):
         file_path = os.path.dirname(os.path.abspath(__file__))
         map_path = os.path.join(file_path, f"resources/maps/level{self.level}.tmx")
 
-
-
         layer_options = {
             "Mushroom_Enemies": {"use_spatial_hash": True},
             "Finish": {"use_spatial_hash": True},
@@ -604,24 +597,20 @@ class GameView(arcade.View):
         self.moving_platforms = arcade.SpriteList()
         if "Moving_Platforms" in self.tile_map.sprite_lists:
             for platform in self.tile_map.sprite_lists["Moving_Platforms"]:
-                # Set movement properties from Tiled properties
                 platform.boundary_left = platform.properties.get("boundary_left", platform.center_x - 100)
                 platform.boundary_right = platform.properties.get("boundary_right", platform.center_x + 100)
                 platform.boundary_top = platform.properties.get("boundary_top", platform.center_y + 100)
                 platform.boundary_bottom = platform.properties.get("boundary_bottom", platform.center_y - 100)
                 platform.change_x = platform.properties.get("change_x", 0)
                 platform.change_y = platform.properties.get("change_y", 0)
-                
-                # Add to sprite list
                 self.moving_platforms.append(platform)
         
         # Create physics engine with ALL platforms
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite, 
-            [self.wall_list, self.moving_platforms],  # Combine static and moving platforms
+            [self.wall_list, self.moving_platforms],
             gravity_constant=GRAVITY
         )
-
 
         if self.tile_map.background_color:
             self.window.background_color = self.tile_map.background_color
@@ -630,10 +619,9 @@ class GameView(arcade.View):
         if self.moving_platforms:
             platforms.append(self.moving_platforms)
 
-        # Create physics engine with ALL platforms
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite, 
-            platforms,  # Now includes both static and moving platforms
+            platforms,
             gravity_constant=GRAVITY
         )
         
@@ -682,8 +670,6 @@ class GameView(arcade.View):
     def on_draw(self):
         self.camera.use()
         self.clear()
-
-
         
         self.scene["Background"].draw()
         self.scene["Midground"].draw()
@@ -692,7 +678,6 @@ class GameView(arcade.View):
         self.scene["Decorations"].draw()
 
         self.frame_count += 1
-
         
         self.wall_list.draw()
         self.moving_platforms.draw()
@@ -723,8 +708,6 @@ class GameView(arcade.View):
                 arcade.color.BLUE, 1
             )
 
-        
-
         self.gui_camera.use()
 
         if self.last_time and self.frame_count % 60 == 0:
@@ -742,39 +725,44 @@ class GameView(arcade.View):
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.UP or key == arcade.key.W:
+            self.up_pressed = True
             if self.physics_engine.can_jump():
                 self.player_sprite.change_y = JUMP_SPEED
         elif key == arcade.key.LEFT or key == arcade.key.A:
-            self.player_sprite.change_x = -MOVEMENT_SPEED
+            self.left_pressed = True
         elif key == arcade.key.RIGHT or key == arcade.key.D:
-            self.player_sprite.change_x = MOVEMENT_SPEED
+            self.right_pressed = True
         elif key == arcade.key.SPACE:
+            self.space_pressed = True
             self.player_sprite.start_attack()
 
-
     def on_key_release(self, key, modifiers):
-        if key in (arcade.key.LEFT, arcade.key.RIGHT, arcade.key.A, arcade.key.D):
-            self.player_sprite.change_x = 0
+        if key == arcade.key.LEFT or key == arcade.key.A:
+            self.left_pressed = False
+        elif key == arcade.key.RIGHT or key == arcade.key.D:
+            self.right_pressed = False
+        elif key == arcade.key.UP or key == arcade.key.W:
+            self.up_pressed = False
+        elif key == arcade.key.SPACE:
+            self.space_pressed = False
 
     def on_update(self, delta_time):
-
         if self.player_sprite.is_dead:
             if self.player_sprite.death_frame > len(self.player_sprite.death_textures) * UPDATES_PER_FRAME:
                 death_screen = DeathScreen(self)
                 self.window.show_view(death_screen)
                 return
-        
-
             
         if not self.game_over:
-    # Move platforms FIRST
+            # Update player movement based on key states
             if self.left_pressed and not self.right_pressed:
-                self.change_x = -MOVEMENT_SPEED
-                self.direction = -1
+                self.player_sprite.change_x = -MOVEMENT_SPEED
+            elif self.right_pressed and not self.left_pressed:
+                self.player_sprite.change_x = MOVEMENT_SPEED
+            else:
+                self.player_sprite.change_x = 0
 
-            if self.right_pressed and not self.left_pressed:
-                self.change_x = MOVEMENT_SPEED
-                self.direction = 1
+            # Move platforms FIRST
             for platform in self.moving_platforms:
                 platform.center_x += platform.change_x
                 if platform.change_x > 0 and platform.center_x > platform.boundary_right:
@@ -782,7 +770,7 @@ class GameView(arcade.View):
                 elif platform.change_x < 0 and platform.center_x < platform.boundary_left:
                     platform.change_x *= -1
     
-        # Then update physics
+            # Then update physics
             self.physics_engine.update()
             self.player_sprite.update_animation(delta_time)
 
@@ -825,7 +813,6 @@ def main():
     start_view = StartScreen()
     window.show_view(start_view)
     arcade.run()
-
 
 if __name__ == "__main__":
     main()
