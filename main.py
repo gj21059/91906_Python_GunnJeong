@@ -246,10 +246,6 @@ class PlayerCharacter(arcade.Sprite):
             self.is_dead = True
             self.death_frame = 0
 
-
-    def heal(self, amount):
-        self.current_health = min(self.current_health + amount, self.max_health)
-
     def draw_health_bar(self):
         bar_width = 50
         bar_height = 5
@@ -412,7 +408,8 @@ class StartScreen(arcade.View):
 class DeathScreen(arcade.View):
     def __init__(self, game_view):
         super().__init__()
-        self.game_view = game_view  # Store reference to the game
+        self.game_view = game_view 
+        self.current_level = game_view.level
     
     def on_draw(self):
         self.clear()
@@ -430,9 +427,10 @@ class DeathScreen(arcade.View):
         )
     
     def on_key_press(self, key, _modifiers):
-        new_game = GameView()
-        new_game.setup()
-        self.window.show_view(new_game)
+        game_view = GameView()
+        game_view.level = self.current_level
+        game_view.setup()
+        self.window.show_view(game_view)
 
 
 class GameView(arcade.View):
@@ -452,7 +450,7 @@ class GameView(arcade.View):
         
         # Game state
         self.end_of_map = 0
-        self.level = 3
+        self.level = 1
         self.game_over = False
         
         self.score = 0
