@@ -640,6 +640,7 @@ class GameView(arcade.View):
 
         # Debug
         self.fps_text = arcade.Text("", x=10, y=40, color=arcade.color.WHITE, font_size=14)
+        self.score_text = arcade.Text(f"Score: {score}", x=10, y=60, color=arcade.color.WHITE, font_size=14)
         self.distance_text = arcade.Text("0.0", x=10, y=20, color=arcade.color.WHITE, font_size=14)
 
         self.pan_camera_to_user()
@@ -755,12 +756,13 @@ class GameView(arcade.View):
             
         if not self.game_over:
             # Update player movement based on key states
-            if self.left_pressed and not self.right_pressed:
-                self.player_sprite.change_x = -MOVEMENT_SPEED
-            elif self.right_pressed and not self.left_pressed:
-                self.player_sprite.change_x = MOVEMENT_SPEED
-            else:
-                self.player_sprite.change_x = 0
+            if not self.player_sprite.is_dead:
+                if self.left_pressed and not self.right_pressed:
+                    self.player_sprite.change_x = -MOVEMENT_SPEED
+                elif self.right_pressed and not self.left_pressed:
+                    self.player_sprite.change_x = MOVEMENT_SPEED
+                else:
+                    self.player_sprite.change_x = 0
 
             # Move platforms FIRST
             for platform in self.moving_platforms:
