@@ -105,6 +105,9 @@ class EnemyCharacter(arcade.Sprite):
             self.attack_cooldown -= 1
 
     def update_animation(self, delta_time: float = 1/60):
+
+
+
         if self.is_dead:
             frame = min(self.cur_texture // UPDATES_PER_FRAME, len(self.death_textures) - 1)
             self.texture = self.death_textures[frame][self.direction]
@@ -171,7 +174,7 @@ class EnemyCharacter(arcade.Sprite):
                     self.change_x = 0
                     self.cur_texture = 0 
             else:
-                chase_speed = 2
+                chase_speed = 4
                 self.change_x = -chase_speed if raw_x < 0 else chase_speed
         else:
             if self.direction == RIGHT_FACING:
@@ -450,7 +453,7 @@ class GameView(arcade.View):
         
         # Game state
         self.end_of_map = 0
-        self.level = 1
+        self.level = 1  
         self.game_over = False
         
         self.score = 0
@@ -765,6 +768,13 @@ class GameView(arcade.View):
             
         if not self.game_over:
     # Move platforms FIRST
+            if self.left_pressed and not self.right_pressed:
+                self.change_x = -MOVEMENT_SPEED
+                self.direction = -1
+
+            if self.right_pressed and not self.left_pressed:
+                self.change_x = MOVEMENT_SPEED
+                self.direction = 1
             for platform in self.moving_platforms:
                 platform.center_x += platform.change_x
                 if platform.change_x > 0 and platform.center_x > platform.boundary_right:
