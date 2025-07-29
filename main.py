@@ -1,10 +1,8 @@
 import time
 import arcade
-import arcade.future.background as background
 import os
 
 
-# Things to do: Add a timer, add death/intro/start screen, add a score system, find an asset for going to new levels
 
 # every funtion needs a docstring
 
@@ -35,7 +33,6 @@ PLAYER_ATTACK_FRAME = 4
 MOVEMENT_SPEED = 5
 UPDATES_PER_FRAME = 5
 IDLE_UPDATES_PER_FRAME = 5
-JUMP_UPDATES_PER_FRAME = 50
 JUMP_SPEED = 20
 GRAVITY = 1.1
 
@@ -269,8 +266,9 @@ class PlayerCharacter(arcade.Sprite):
                          arcade.color.WHITE, 10, anchor_x="center")
 
     def start_attack(self):
-        if not self.is_attacking:
+        if not self.is_attacking and self.change_y == 0:
             self.is_attacking = True
+            arcade.play_sound(self.game_view.sword_sound)
             self.cur_texture = 0
 
     def update_animation(self, delta_time: float = 1 / 60):
@@ -354,8 +352,6 @@ class PlayerCharacter(arcade.Sprite):
 class StartScreen(arcade.View):
     def __init__(self):
         super().__init__()
-        self.button_pulse = 0
-        self.button_pulse_dir = 1
         self.title_y = WINDOW_HEIGHT + 100
 
     def on_show(self):
@@ -488,10 +484,8 @@ class GameView(arcade.View):
         self.physics_engine = None
         
         # Game state
-        self.end_of_map = 0
         self.level = 1
         self.game_over = False
-        self.score = 0
         
         # Camera
         self.camera = None
@@ -510,30 +504,13 @@ class GameView(arcade.View):
         self.hit_sound = arcade.load_sound("resources/sounds/hit.wav")
         
         # Textures
-        self.run_textures = []
-        self.jump_textures = []
-        self.fall_textures = []
-        self.idle_textures = []
-        self.attack_textures = []
-        self.takedamage_textures = []
-        self.death_textures = []
-        self.enemy_walk_textures = []
-        self.enemy_attack_textures = []
-        self.enemy_death_textures = []
-        self.enemy_takedamage_textures = []
-
-        # Key states
-        self.left_pressed = False
-        self.right_pressed = False
-        self.up_pressed = False
-        self.space_pressed = False
+    
 
         self.setup()
 
     def setup(self):
         self.player_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
-        self.coin_list = arcade.SpriteList()
         
         # Reset key states
         self.left_pressed = False
@@ -639,7 +616,6 @@ class GameView(arcade.View):
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
         self.load_enemies_from_map()
 
-        self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
         self.boundaries_list = self.tile_map.sprite_lists["Boundaries"]
         self.wall_list = self.tile_map.sprite_lists["Ground"]
         self.finish_list = self.tile_map.sprite_lists["Finish"]
@@ -655,19 +631,10 @@ class GameView(arcade.View):
             for platform in self.tile_map.sprite_lists["Moving_Platforms"]:
                 platform.boundary_left = platform.properties.get("boundary_left", platform.center_x - 100)
                 platform.boundary_right = platform.properties.get("boundary_right", platform.center_x + 100)
-                platform.boundary_top = platform.properties.get("boundary_top", platform.center_y + 100)
-                platform.boundary_bottom = platform.properties.get("boundary_bottom", platform.center_y - 100)
                 platform.change_x = platform.properties.get("change_x", 0)
-                platform.change_y = platform.properties.get("change_y", 0)
                 self.moving_platforms.append(platform)
         
-        # Create physics engine with ALL platforms
-        self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.player_sprite, 
-            [self.wall_list, self.moving_platforms],
-            gravity_constant=GRAVITY
-        )
-
+ 
         if self.tile_map.background_color:
             self.window.background_color = self.tile_map.background_color
 
@@ -740,7 +707,6 @@ class GameView(arcade.View):
         self.moving_platforms.draw()
         self.finish_list.draw()
         self.spikes_list.draw()
-        self.coin_list.draw()
         self.enemy_list.draw()
         self.player_list.draw()
 
@@ -793,7 +759,7 @@ class GameView(arcade.View):
         elif key == arcade.key.SPACE:
             self.space_pressed = True
             self.player_sprite.start_attack()
-            arcade.play_sound(self.sword_sound)
+            
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.LEFT or key == arcade.key.A:
@@ -839,8 +805,6 @@ class GameView(arcade.View):
             self.physics_engine.update()
             self.player_sprite.update_animation(delta_time)
 
-            if self.player_sprite.right >= self.end_of_map:
-                self.game_over = True
             
             if arcade.check_for_collision_with_list(self.player_sprite, self.finish_list):
                 if self.level == 3:
@@ -850,13 +814,14 @@ class GameView(arcade.View):
                     self.level += 1
                     self.setup()
 
-            if arcade.check_for_collision_with_list(self.player_sprite, self.spikes_list):
-                self.player_sprite.current_health = 0
-                self.player_sprite.is_dead = True
+            self.hazards = [self.spikes_list, self.boundaries_list]
 
-            if arcade.check_for_collision_with_list(self.player_sprite, self.boundaries_list):
-                self.player_sprite.current_health = 0
-                self.player_sprite.is_dead   = True
+            # Then check collisions in one loop
+            for hazard in self.hazards:
+                if arcade.check_for_collision_with_list(self.player_sprite, hazard):
+                    self.player_sprite.current_health = 0
+                    self.player_sprite.is_dead = True
+                    break  # Exit early if any hazard hits
 
             for enemy in self.enemy_list:
                 enemy.update()
