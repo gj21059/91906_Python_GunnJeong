@@ -340,6 +340,7 @@ class PlayerCharacter(arcade.Sprite):
             self.current_health = 0
             self.is_dead = True
             self.death_frame = 0
+            
 
     def draw_health_bar(self):
         bottom = self.center_y + HEALTH_BAR_Y_OFFSET
@@ -558,7 +559,9 @@ class DeathScreen(arcade.View):
         super().__init__()
         self.game_view = game_view
         self.current_level = game_view.level
-
+        arcade.play_sound(self.game_view.game_over_sound)
+        
+        
     def on_draw(self):
         self.clear()
         arcade.draw_text(
@@ -985,6 +988,7 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time):
         if self.player_sprite.is_dead:
+            
             if (
                 self.player_sprite.death_frame
                 > len(self.player_sprite.death_textures) * UPDATES_PER_FRAME
