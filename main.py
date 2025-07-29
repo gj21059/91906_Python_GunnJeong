@@ -793,7 +793,7 @@ class GameView(arcade.View):
 
             if arcade.check_for_collision_with_list(self.player_sprite, self.boundaries_list):
                 self.player_sprite.current_health = 0
-                self.player_sprite.is_dead = True
+                self.player_sprite.is_dead   = True
 
             for enemy in self.enemy_list:
                 enemy.update()
