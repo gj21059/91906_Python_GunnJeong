@@ -374,7 +374,7 @@ class PlayerCharacter(arcade.Sprite):
     def start_attack(self):
         if not self.is_attacking and self.change_y == 0:
             self.is_attacking = True
-            arcade.play_sound(self.game_view.sword_sound, volume=0.3)
+            arcade.play_sound(self.game_view.sword_sound, volume=0.4)
             self.cur_texture = 0
 
     def update_animation(self, delta_time: float = 1 / 60):
@@ -663,6 +663,7 @@ class GameView(arcade.View):
         self.jump_sound = arcade.load_sound("resources/sounds/jump.wav")
         self.sword_sound = arcade.load_sound("resources/sounds/sword.mp3")
         self.hit_sound = arcade.load_sound("resources/sounds/hit.wav")
+        self.game_over_sound = arcade.load_sound("resources/sounds/game_over.mp3")
 
         self.setup()
 
