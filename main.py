@@ -364,8 +364,8 @@ class StartScreen(arcade.View):
         arcade.draw_text(
             title,
             WINDOW_WIDTH//2, self.title_y,
-            arcade.color.WHITE, 54,
-            anchor_x="center", font_name="Kenney Future"
+            arcade.color.WHITE, 80,
+            anchor_x="center", font_name="Press Start 2P"
         )
         
         arcade.draw_text(
@@ -378,6 +378,12 @@ class StartScreen(arcade.View):
         arcade.draw_text(
             "Arrow Keys/WASD to Move | SPACE to Attack |",
             WINDOW_WIDTH//2, WINDOW_HEIGHT//2 - 50,
+            arcade.color.LIGHT_GRAY, 18,
+            anchor_x="center"
+        )
+        arcade.draw_text(
+            "Spikes are instant death!",
+            WINDOW_WIDTH//2, WINDOW_HEIGHT//2 - 100,
             arcade.color.LIGHT_GRAY, 18,
             anchor_x="center"
         )
@@ -421,11 +427,52 @@ class DeathScreen(arcade.View):
         game_view.setup()
         self.window.show_view(game_view)
 
+class EndScreen(arcade.View):
+    def __init__(self, game_view):
+        super().__init__()
+        self.game_view = game_view
+    
+    def on_draw(self):
+        self.clear()
+        arcade.set_background_color(arcade.color.BLACK)
+        
+        # Title
+        arcade.draw_text(
+            "THANKS FOR PLAYING!",
+            WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + 100,
+            arcade.color.GOLD, 54,
+            anchor_x="center", font_name="Kenney Future"
+        )
+        
+        # Instructions
+        arcade.draw_text(
+            "R - Restart Game",
+            WINDOW_WIDTH//2, WINDOW_HEIGHT//2,
+            arcade.color.WHITE, 36,
+            anchor_x="center"
+        )
+        
+        arcade.draw_text(
+            "Q - Quit Game",
+            WINDOW_WIDTH//2, WINDOW_HEIGHT//2 - 50,
+            arcade.color.WHITE, 36,
+            anchor_x="center"
+        )
+    
+    def on_key_press(self, key, _modifiers):
+        if key == arcade.key.R:
+
+            game_view = GameView()
+            game_view.setup()
+            self.window.show_view(game_view)
+        elif key == arcade.key.Q:
+            # Quit game
+            arcade.close_window()
+
 class GameView(arcade.View):
     def __init__(self):
         super().__init__()
 
-        self.window.current_game_view = self
         
         # Game objects
         self.tile_map = None
@@ -438,7 +485,7 @@ class GameView(arcade.View):
         
         # Game state
         self.end_of_map = 0
-        self.level = 3
+        self.level = 1
         self.game_over = False
         self.score = 0
         
@@ -452,6 +499,10 @@ class GameView(arcade.View):
         self.last_time = None
         self.fps_text = None
         self.distance_text = None
+
+        # Sound Effects
+        self.jump_sound = arcade.load_sound("resources/sounds/jump.wav")
+        self.sword_sound = arcade.load_sound("resources/sounds/sword.mp3")
         
         # Textures
         self.run_textures = []
@@ -728,6 +779,7 @@ class GameView(arcade.View):
             self.up_pressed = True
             if self.physics_engine.can_jump():
                 self.player_sprite.change_y = JUMP_SPEED
+                arcade.play_sound(self.jump_sound)
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.left_pressed = True
         elif key == arcade.key.RIGHT or key == arcade.key.D:
@@ -735,6 +787,7 @@ class GameView(arcade.View):
         elif key == arcade.key.SPACE:
             self.space_pressed = True
             self.player_sprite.start_attack()
+            arcade.play_sound(self.sword_sound)
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.LEFT or key == arcade.key.A:
@@ -784,8 +837,12 @@ class GameView(arcade.View):
                 self.game_over = True
             
             if arcade.check_for_collision_with_list(self.player_sprite, self.finish_list):
-                self.level += 1
-                self.setup()
+                if self.level == 3:
+                    end_screen = EndScreen(self)
+                    self.window.show_view(end_screen)
+                else:
+                    self.level += 1
+                    self.setup()
 
             if arcade.check_for_collision_with_list(self.player_sprite, self.spikes_list):
                 self.player_sprite.current_health = 0

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="17" nextobjectid="327">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="17" nextobjectid="328">
  <tileset firstgid="1" source="../oak_woods_tileset.tsx"/>
  <tileset firstgid="316" name="Backgrounds" tilewidth="708" tileheight="180" tilecount="18" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
@@ -75,6 +75,7 @@
  </tileset>
  <objectgroup id="6" name="Background">
   <object id="273" gid="331" x="0" y="408" width="576" height="360"/>
+  <object id="327" gid="331" x="1296" y="-360" width="872" height="420" rotation="-180"/>
  </objectgroup>
  <objectgroup id="7" name="Midground">
   <object id="274" gid="332" x="0" y="408" width="576" height="336"/>
@@ -442,7 +443,7 @@
  <objectgroup id="14" name="Finish">
   <object id="306" gid="338" x="2232" y="768" width="41" height="59"/>
  </objectgroup>
- <layer id="16" name="Boundaries" width="100" height="100" visible="0">
+ <layer id="16" name="Boundaries" width="100" height="100">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

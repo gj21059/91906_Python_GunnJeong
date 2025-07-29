@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="130" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="19" nextobjectid="422">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="130" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="19" nextobjectid="426">
  <tileset firstgid="1" source="../oak_woods_tileset.tsx"/>
  <tileset firstgid="316" name="Backgrounds" tilewidth="708" tileheight="180" tilecount="18" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
@@ -462,6 +462,7 @@
  </objectgroup>
  <objectgroup id="14" name="Finish">
   <object id="403" gid="338" x="1752" y="144" width="41" height="59"/>
+  <object id="425" gid="338" x="336" y="360" width="41" height="59"/>
  </objectgroup>
  <layer id="16" name="Boundaries" width="130" height="100">
   <data encoding="csv">
