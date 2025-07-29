@@ -6,7 +6,7 @@ import os
 
 # Things to do: Add a timer, add death/intro/start screen, add a score system, find an asset for going to new levels
 
-# every funtion needs a 
+# every funtion needs a docstring
 
 
 # Constants
