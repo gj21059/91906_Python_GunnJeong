@@ -24,7 +24,7 @@ CAMERA_PAN_SPEED = 0.30
 PLAYER_HEALTH = 5
 PLAYER_ATTACK_DAMAGE = 1
 MUSHROOM_ENEMY_HEALTH = 3
-MUSHROOM_ENEMY_DAMAGE = 1
+MUSHROOM_ENEMY_DAMAGE = 2
 RIGHT_FACING = 0
 LEFT_FACING = 1
 
@@ -40,10 +40,12 @@ JUMP_SPEED = 20
 GRAVITY = 1.1
 
 class EnemyCharacter(arcade.Sprite):
-    def __init__(self, x, y, max_health, left_boundary, right_boundary, walk_textures, attack_textures, takedamage_textures, death_textures):
+    def __init__(self, x, y, max_health, left_boundary, right_boundary, walk_textures, attack_textures, takedamage_textures, death_textures, game_view):
         super().__init__(walk_textures[0][0], scale=ENEMY_SCALING)
         self.center_x = x
         self.center_y = y
+
+        self.game_view = game_view
 
         self.max_health = max_health
         self.current_health = max_health
@@ -188,6 +190,7 @@ class EnemyCharacter(arcade.Sprite):
             return
             
         self.current_health -= amount
+        arcade.play_sound(self.game_view.hit_sound)
         self.is_taking_damage = True
         self.takedamage_frame = 0
         self.is_attacking = False
@@ -237,6 +240,7 @@ class PlayerCharacter(arcade.Sprite):
             return
 
         self.current_health -= damage
+        arcade.play_sound(self.game_view.hit_sound)
         self.invulnerable_timer = 60
         self.is_taking_damage = True
         self.takedamage_frame = 0
@@ -503,6 +507,7 @@ class GameView(arcade.View):
         # Sound Effects
         self.jump_sound = arcade.load_sound("resources/sounds/jump.wav")
         self.sword_sound = arcade.load_sound("resources/sounds/sword.mp3")
+        self.hit_sound = arcade.load_sound("resources/sounds/hit.wav")
         
         # Textures
         self.run_textures = []
@@ -713,7 +718,8 @@ class GameView(arcade.View):
                 walk_textures=self.enemy_walk_textures,
                 attack_textures=self.enemy_attack_textures,
                 takedamage_textures=self.enemy_takedamage_textures,
-                death_textures=self.enemy_death_textures
+                death_textures=self.enemy_death_textures,
+                game_view=self
             )
             enemy.bottom = y
             self.enemy_list.append(enemy)
