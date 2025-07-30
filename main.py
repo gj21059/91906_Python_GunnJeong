@@ -62,6 +62,7 @@ ENEMY_WALK_FRAMES = 4
 ENEMY_ATTACK_FRAMES = 8
 ENEMY_DEATH_FRAMES = 4
 ENEMY_TAKEDAMAGE_FRAMES = 4
+ENEMY_ATTACKING_FRAME = 6
 
 # Constants for UI
 TITLE_FONT_SIZE = 80
@@ -226,7 +227,7 @@ class EnemyCharacter(arcade.Sprite):
         if self.is_attacking:
             self.change_x = 0
 
-            if current_frame == 6 and not self.has_dealt_damage:
+            if current_frame == ENEMY_ATTACKING_FRAME and not self.has_dealt_damage:
                 if (
                     distance_x < ENEMY_ATTACK_RANGE_X
                     and distance_y < ENEMY_ATTACK_RANGE_Y
