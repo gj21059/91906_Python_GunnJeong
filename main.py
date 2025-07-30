@@ -375,7 +375,7 @@ class PlayerCharacter(arcade.Sprite):
     def start_attack(self):
         if not self.is_attacking and self.change_y == 0:
             self.is_attacking = True
-            arcade.play_sound(self.game_view.sword_sound, volume=0.4)
+            arcade.play_sound(self.game_view.sword_sound, volume=0.8)
             self.cur_texture = 0
 
     def update_animation(self, delta_time: float = 1 / 60):
