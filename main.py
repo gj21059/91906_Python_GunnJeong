@@ -269,7 +269,7 @@ class EnemyCharacter(arcade.Sprite):
             return
 
         self.current_health -= amount
-        arcade.play_sound(self.game_view.hit_sound, volume=1.4)
+        arcade.play_sound(self.game_view.hit_sound, volume = 2.6)
         self.is_taking_damage = True
         self.takedamage_frame = 0
         self.is_attacking = False
@@ -331,7 +331,7 @@ class PlayerCharacter(arcade.Sprite):
             return
 
         self.current_health -= damage
-        arcade.play_sound(self.game_view.hit_sound, volume=1.4)
+        arcade.play_sound(self.game_view.hit_sound, volume=2.6)
         self.invulnerable_timer = INVULNERABILITY_FRAMES
         self.is_taking_damage = True
         self.takedamage_frame = 0
@@ -375,7 +375,7 @@ class PlayerCharacter(arcade.Sprite):
     def start_attack(self):
         if not self.is_attacking and self.change_y == 0:
             self.is_attacking = True
-            arcade.play_sound(self.game_view.sword_sound, volume=0.8)
+            arcade.play_sound(self.game_view.sword_sound, volume=0.5)
             self.cur_texture = 0
 
     def update_animation(self, delta_time: float = 1 / 60):
@@ -968,7 +968,7 @@ class GameView(arcade.View):
             self.up_pressed = True
             if self.physics_engine.can_jump():
                 self.player_sprite.change_y = JUMP_SPEED
-                arcade.play_sound(self.jump_sound, volume=1.5)
+                arcade.play_sound(self.jump_sound, volume=4.3)
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.left_pressed = True
         elif key == arcade.key.RIGHT or key == arcade.key.D:
