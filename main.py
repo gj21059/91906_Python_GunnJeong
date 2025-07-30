@@ -666,7 +666,8 @@ class GameView(arcade.View):
         self.jump_sound = arcade.load_sound("resources/sounds/jump.wav")
         self.sword_sound = arcade.load_sound("resources/sounds/sword.mp3")
         self.hit_sound = arcade.load_sound("resources/sounds/hit.wav")
-        self.game_over_sound = arcade.load_sound("resources/sounds/game_over.mp3")
+        self.game_over_sound = arcade.load_sound("" \
+        "resources/sounds/game_over.mp3")
 
         self.setup()
 
