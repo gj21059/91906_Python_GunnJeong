@@ -35,6 +35,7 @@ PLAYER_SPAWN_X = 196
 PLAYER_SPAWN_Y = 4800
 RIGHT_FACING = 0
 LEFT_FACING = 1
+FINAL_LEVEL = 3
 
 PLAYER_ATTACK_RANGE = 80
 PLAYER_ATTACK_HEIGHT = 40
@@ -1218,6 +1219,9 @@ class GameView(arcade.View):
             # Gets enemy position from map object.
             x = enemy_obj.shape[0]
             y = enemy_obj.shape[1]
+
+            # If the enemy has a custom left and right boundary,
+            # it uses those values, otherwise it uses the default.
             left = enemy_obj.properties.get(
                 "left_boundary", x - ENEMY_PATROL_DISTANCE
             )
@@ -1225,6 +1229,7 @@ class GameView(arcade.View):
                 "right_boundary", x + ENEMY_PATROL_DISTANCE
             )
 
+            # Creates the enemy character instance.
             enemy = EnemyCharacter(
                 x=x,
                 y=0,
@@ -1238,20 +1243,29 @@ class GameView(arcade.View):
                 game_view=self,
             )
             enemy.bottom = y
+            # Adds the enemy to the game's enemy list.
             self.enemy_list.append(enemy)
 
     def on_draw(self):
+        """Render all game elements including background, sprites, UI elements. 
+        Called every frame to update the display.
+        """
+
+        # Activate the camera.
         self.camera.use()
         self.clear()
 
+        # Draw the background layers in the proper order.
         self.scene["Background"].draw()
         self.scene["Midground"].draw()
         self.scene["Foreground"].draw()
         self.scene["Background_Filler"].draw()
         self.scene["Decorations"].draw()
 
+
         self.frame_count += 1
 
+        # Draw all in game objects and level elements.
         self.wall_list.draw()
         self.moving_platforms.draw()
         self.finish_list.draw()
@@ -1259,8 +1273,13 @@ class GameView(arcade.View):
         self.enemy_list.draw()
         self.player_list.draw()
 
+        # Draws the health bars for player and enemies.
+        # this is done by iterating through the player and
+        # enemy lists
+        # and calling the draw_health_bar method for each sprite.
         for sprite in self.player_list:
             sprite.draw_health_bar()
+
 
         for enemy in self.enemy_list:
             enemy.draw_health_bar()
@@ -1289,6 +1308,7 @@ class GameView(arcade.View):
                 1,
             )
 
+        # Draw the GUI camera for UI elements.
         self.gui_camera.use()
 
         if self.last_time and self.frame_count % 60 == 0:
@@ -1305,6 +1325,16 @@ class GameView(arcade.View):
         self.distance_text.draw()
 
     def on_key_press(self, key, modifiers):
+        """Handles key presses for player movement and actions.
+        Sets the corresponding flags for movement and actions.
+        """
+        # Handles key presses for player movement and actions.
+        # This sets the flags for movement and actions 
+        # based on the key pressed. If the player presses the up
+        # arrow or W key, it sets the up_pressed flag to True and
+        # checks if the player can jump. If so, it sets the player's
+        # vertical speed to the jump speed and plays the jump sound.
+        # the rest of the keys follow the same logic.
         if key == arcade.key.UP or key == arcade.key.W:
             self.up_pressed = True
             if self.physics_engine.can_jump():
@@ -1319,6 +1349,14 @@ class GameView(arcade.View):
             self.player_sprite.start_attack()
 
     def on_key_release(self, key, modifiers):
+        """Handles key releases for player movement and actions.
+        Resets the corresponding flags for movement and actions.
+        """
+        # Handles key releases for player movement and actions.
+        # This resets the flags for movement and actions
+        # based on the key released. If the player releases the up
+        # arrow or W key, it sets the up_pressed flag to False.
+        # the rest of the keys follow the same logic.
         if key == arcade.key.LEFT or key == arcade.key.A:
             self.left_pressed = False
         elif key == arcade.key.RIGHT or key == arcade.key.D:
@@ -1329,8 +1367,14 @@ class GameView(arcade.View):
             self.space_pressed = False
 
     def on_update(self, delta_time):
+        """Updates the game state, which handles player death and 
+        screen transitions, player movement, enemy behaviour and AI,
+        moving platforms, physics updates, and camera panning."""
+
+        # Handles player death and screen transitions.
         if self.player_sprite.is_dead:
-            
+            # Wait for the death animation to finish
+            # before showing the death screen.
             if (
                 self.player_sprite.death_frame
                 > len(self.player_sprite.death_textures) * UPDATES_PER_FRAME
@@ -1339,7 +1383,9 @@ class GameView(arcade.View):
                 self.window.show_view(death_screen)
                 return
 
-
+        # Only proceed with game logic if the game is not over.
+        # This prevents any updates to the game state when the 
+        # player is dead or the game is over.
         if not self.game_over:
             # Only update movement if player is not attacking and not dead
             if (
@@ -1371,20 +1417,30 @@ class GameView(arcade.View):
                 ):
                     platform.change_x *= -1
 
-            # Then update physics
+            # Then update physics so that the player
+            # can interact with them.
             self.physics_engine.update()
             self.player_sprite.update_animation(delta_time)
 
+            # Check for collisions with the finish line.
+            # If the player collides with the finish line,
+            # it checks if the level is complete.
+            # If the level is complete, it either shows the end screen
+            # or advances to the next level.
+            # If the player is on the last level
+            # it shows the end screen.
             if arcade.check_for_collision_with_list(
                 self.player_sprite, self.finish_list
             ):
-                if self.level == 3:
+                if self.level == FINAL_LEVEL:
                     end_screen = EndScreen(self)
                     self.window.show_view(end_screen)
                 else:
                     self.level += 1
                     self.setup()
 
+            # This is a list of hazards that the 
+            # player can collide with.
             self.hazards = [self.spikes_list, self.boundaries_list]
 
             # Then check collisions in one loop
@@ -1394,16 +1450,26 @@ class GameView(arcade.View):
                 ):
                     self.player_sprite.current_health = 0
                     self.player_sprite.is_dead = True
-                    break  # Exit early if any hazard hits
-
+                    # Exit early if any hazard hits
+                    break  
+            
+            # Updates all the enemies in the game.
+            # This iterates through the enemy list and updates.
             for enemy in self.enemy_list:
                 enemy.update()
                 enemy.detect_player(self.player_sprite)
                 enemy.update_animation(delta_time)
 
+        # Smoothly moves the camera to follow the player.
         self.pan_camera_to_user(CAMERA_PAN_SPEED)
 
     def pan_camera_to_user(self, panning_fraction: float = 1.0):
+        """Smoothly moves the camera to follow the player position
+        using arcade.math.smerp_2d for smooth panning.
+        Constrains the camera position within the defined bounds."""
+
+        # Calculate the new camera position based on the 
+        # player's position
         self.camera.position = arcade.math.smerp_2d(
             self.camera.position,
             self.player_sprite.position,
@@ -1417,11 +1483,14 @@ class GameView(arcade.View):
 
 
 def main():
+    """
+    Main Function of the code
+    """
     window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
     start_view = StartScreen()
     window.show_view(start_view)
     arcade.run()
 
-
+# Runs the code.
 if __name__ == "__main__":
     main()
