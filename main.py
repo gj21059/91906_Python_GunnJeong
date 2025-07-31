@@ -19,6 +19,8 @@ PLAYER_HEALTH = 5
 PLAYER_ATTACK_DAMAGE = 1
 MUSHROOM_ENEMY_HEALTH = 3
 MUSHROOM_ENEMY_DAMAGE = 2
+PLAYER_SPAWN_X = 196
+PLAYER_SPAWN_Y = 4800
 RIGHT_FACING = 0
 LEFT_FACING = 1
 
@@ -782,8 +784,9 @@ class GameView(arcade.View):
             self.enemy_list,
             self,
         )
-        self.player_sprite.center_x = 196
-        self.player_sprite.center_y = 4800
+        
+        self.player_sprite.center_x = PLAYER_SPAWN_X
+        self.player_sprite.center_y = PLAYER_SPAWN_Y
         self.player_list.append(self.player_sprite)
 
         # Load map
