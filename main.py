@@ -241,7 +241,8 @@ class EnemyCharacter(arcade.Sprite):
             return
 
         if self.is_taking_damage:
-            # If the enemy is taking damage, play takedamage animation
+            # If the enemy is taking damage,
+            # play takedamage animation
             # works by the same logic as the death animation.
             if (
                 self.takedamage_frame
@@ -295,7 +296,8 @@ class EnemyCharacter(arcade.Sprite):
         distance_x = abs(raw_x)
         distance_y = abs(player_sprite.center_y - self.center_y)
 
-        # Check if the player is within the enemy's patrol boundaries.
+        # Check if the player is within the enemy's 
+        # patrol boundaries.
         player_in_boundaries = (
             self.left_boundary
             <= player_sprite.center_x
@@ -768,7 +770,8 @@ class StartScreen(arcade.View):
 
     def on_update(self, delta_time):
         """
-        Updates the position of the title to create a falling effect."""
+        Updates the position of the title to create a
+        falling effect."""
         if self.title_y > self.title_target_y:
             self.title_y -= delta_time * self.title_drop_speed
 
@@ -804,7 +807,8 @@ class DeathScreen(arcade.View):
         so the current level can be the same.
         Also plays a game over sound effect.
         """
-        # Store reference to the game view that was active before death
+        # Store reference to the game view that 
+        # was active before death
         # then keeps track of the leve the player was on
         # finally plays the game over sound effect.
         super().__init__()
@@ -1247,7 +1251,8 @@ class GameView(arcade.View):
             self.enemy_list.append(enemy)
 
     def on_draw(self):
-        """Render all game elements including background, sprites, UI elements. 
+        """Render all game elements including background, 
+        sprites, UI elements. 
         Called every frame to update the display.
         """
 
