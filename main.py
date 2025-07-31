@@ -47,6 +47,11 @@ IDLE_UPDATES_PER_FRAME = 5
 JUMP_SPEED = 20
 GRAVITY = 1.1
 
+# Constants for volumes
+HIT_SOUND_VOLUME = 0.5
+JUMP_SOUND_VOLUME = 0.5
+ATTACK_SOUND_VOLUME = 0.5
+
 # Constants for health bars
 HEALTH_BAR_WIDTH = 50
 HEALTH_BAR_HEIGHT = 5
@@ -371,7 +376,7 @@ class EnemyCharacter(arcade.Sprite):
             return
 
         self.current_health -= amount
-        arcade.play_sound(self.game_view.hit_sound, volume=2.6)
+        arcade.play_sound(self.game_view.hit_sound, volume=HIT_SOUND_VOLUME)
 
         # Triggers hurt animation and canecels any attack.
         self.is_taking_damage = True
@@ -475,7 +480,7 @@ class PlayerCharacter(arcade.Sprite):
         # Reduces the player's health by the damage amount,
         # and plays a hit sound.
         self.current_health -= damage
-        arcade.play_sound(self.game_view.hit_sound, volume=2.6)
+        arcade.play_sound(self.game_view.hit_sound, volume=HIT_SOUND_VOLUME)
         self.invulnerable_timer = INVULNERABILITY_FRAMES
         self.is_taking_damage = True
         self.takedamage_frame = 0
@@ -539,7 +544,8 @@ class PlayerCharacter(arcade.Sprite):
             self.is_attacking = True
             # Plays the attack sound effect and resets the texture
             # to the first frame of the attack animation.
-            arcade.play_sound(self.game_view.sword_sound, volume=0.5)
+            arcade.play_sound(self.game_view.sword_sound, 
+                              volume=ATTACK_SOUND_VOLUME)
             self.cur_texture = 0
 
     def update_animation(self, delta_time: float = 1 / 60):
@@ -1340,11 +1346,14 @@ class GameView(arcade.View):
         # checks if the player can jump. If so, it sets the player's
         # vertical speed to the jump speed and plays the jump sound.
         # the rest of the keys follow the same logic.
+
+        if self.player_sprite.is_dead:
+            return
         if key == arcade.key.UP or key == arcade.key.W:
             self.up_pressed = True
             if self.physics_engine.can_jump():
                 self.player_sprite.change_y = JUMP_SPEED
-                arcade.play_sound(self.jump_sound, volume=4.3)
+                arcade.play_sound(self.jump_sound, volume=JUMP_SOUND_VOLUME)
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.left_pressed = True
         elif key == arcade.key.RIGHT or key == arcade.key.D:
