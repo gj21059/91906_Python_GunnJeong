@@ -963,12 +963,6 @@ class GameView(arcade.View):
         self.gui_camera = None
         self.camera_bounds = None
 
-        # Debug
-        self.frame_count = 0
-        self.last_time = None
-        self.fps_text = None
-        self.distance_text = None
-
         # Sound Effects
         self.jump_sound = arcade.load_sound("resources/sounds/jump.wav")
         self.sword_sound = arcade.load_sound("resources/sounds/sword.mp3")
@@ -1203,14 +1197,6 @@ class GameView(arcade.View):
             max_y,
         )
 
-        # Debug
-        self.fps_text = arcade.Text(
-            "", x=10, y=40, color=arcade.color.WHITE, font_size=14
-        )
-        self.distance_text = arcade.Text(
-            "0.0", x=10, y=20, color=arcade.color.WHITE, font_size=14
-        )
-
         self.pan_camera_to_user()
         self.game_over = False
 
@@ -1274,8 +1260,6 @@ class GameView(arcade.View):
         self.scene["Decorations"].draw()
 
 
-        self.frame_count += 1
-
         # Draw all in game objects and level elements.
         self.wall_list.draw()
         self.moving_platforms.draw()
@@ -1294,46 +1278,9 @@ class GameView(arcade.View):
 
         for enemy in self.enemy_list:
             enemy.draw_health_bar()
-            arcade.draw_line(
-                enemy.left_boundary,
-                enemy.center_y - 50,
-                enemy.left_boundary,
-                enemy.center_y + 50,
-                arcade.color.RED,
-                2,
-            )
-            arcade.draw_line(
-                enemy.right_boundary,
-                enemy.center_y - 50,
-                enemy.right_boundary,
-                enemy.center_y + 50,
-                arcade.color.GREEN,
-                2,
-            )
-            arcade.draw_line(
-                enemy.left_boundary,
-                enemy.center_y,
-                enemy.right_boundary,
-                enemy.center_y,
-                arcade.color.BLUE,
-                1,
-            )
 
         # Draw the GUI camera for UI elements.
         self.gui_camera.use()
-
-        if self.last_time and self.frame_count % 60 == 0:
-            fps = round(1.0 / (time.time() - self.last_time) * 60)
-            self.fps_text.text = f"FPS: {fps:3d}"
-
-        self.fps_text.draw()
-
-        if self.frame_count % 60 == 0:
-            self.last_time = time.time()
-
-        distance = self.player_sprite.right
-        self.distance_text.text = f"Distance: {distance}"
-        self.distance_text.draw()
 
     def on_key_press(self, key, modifiers):
         """Handles key presses for player movement and actions.
