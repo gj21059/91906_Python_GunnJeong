@@ -1348,7 +1348,8 @@ class GameView(arcade.View):
         # This prevents any updates to the game state when the 
         # player is dead or the game is over.
         if not self.game_over:
-            # Only update movement if player is not attacking and not dead
+            # Only update movement if player is not
+            # attacking and not dead
             if (
                 not self.player_sprite.is_attacking
                 and not self.player_sprite.is_dead
