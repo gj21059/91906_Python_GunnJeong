@@ -11,7 +11,6 @@ This game features:
 """
 
 # Importing the libraries that are used for this game.
-import time
 import arcade
 import os
 
